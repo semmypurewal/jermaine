@@ -1,5 +1,5 @@
 Jermaine is a JavaScript data modeling tool. Drawing inspiration from 
-Jasmine, Mongoose, and Rails, it's designed to help create robust and
+Jasmine, Mongoose, and ActiveRecord, it's designed to help create robust and
 readable JavaScript data models.
 
 Thanks to the folks at NEMAC (nemac.unca.edu) for allowing me to release
