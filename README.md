@@ -74,42 +74,42 @@ And manipulate the objects:
 If you later change the model, all new objects will be created with the updated
 model spec, but old objects will not enjoy the new features:
 
-   Person.hasAn("id");
+    Person.hasAn("id");
 
-   var a = new Person();
-   a.firstName("John").lastName("Maxwell").id(500);  //fine
+    var a = new Person();
+    a.firstName("John").lastName("Maxwell").id(500);  //fine
 
-   p.id(501); //throws an error
+    p.id(501); //throws an error
 
 
 Some basic validation is built in as well, so you can define more robust models:
 
-var Card,
-    Deck,
-    suits = ["clubs", "diamonds", "hearts", "spades"],
-    ranks = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
+    var Card,
+        Deck,
+        suits = ["clubs", "diamonds", "hearts", "spades"],
+        ranks = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
         
-Card = new Model(function () {
-     this.isImmutable();
-     this.hasA("suit").which.isOneOf(suits);
-     this.hasA("rank").which.isOneOf(ranks);
+    Card = new Model(function () {
+        this.isImmutable();
+        this.hasA("suit").which.isOneOf(suits);
+        this.hasA("rank").which.isOneOf(ranks);
 
-     this.isBuiltWith("rank","suit");
-});
+        this.isBuiltWith("rank","suit");
+    });
 
-Deck = new Model(function () {
-     this.hasMany("cards").which.validateWith(function (card) {
-         return card instanceof Card;
-     });
+    Deck = new Model(function () {
+        this.hasMany("cards").which.validateWith(function (card) {
+            return card instanceof Card;
+        });
 
-     this.isBuiltWith(function () {
-          for (suit = 0; suit < suits.length; suit++) {
-               for (rank = 0; rank < ranks.length; rank++) {
-                   this.cards().add(new Card(ranks[rank], suits[suit]));
-               }
-           }
-     });
-});
+        this.isBuiltWith(function () {
+            for (suit = 0; suit < suits.length; suit++) {
+                for (rank = 0; rank < ranks.length; rank++) {
+                    this.cards().add(new Card(ranks[rank], suits[suit]));
+                }
+            }
+        });
+    });
 
 Right now, you can do the following with a Model object:
 //attribute related
