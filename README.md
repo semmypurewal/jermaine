@@ -113,43 +113,43 @@ Some basic validation is built in as well, so you can define more robust models:
 
 Right now, you can do the following with a Model object:
 //attribute related
-hasA -- creates an encapsulated attribute
-hasAn -- syntactic sugar for hasA
-hasMany -- creates an encapsulated list of encapsulated attributes
-attributes -- returns an array of attribute names as strings
-attribute -- returns the specified Attr or AttrList object
-parent -- returns the constructor of the parent, if one exists
+*hasA -- creates an encapsulated attribute
+*hasAn -- syntactic sugar for hasA
+*hasMany -- creates an encapsulated list of encapsulated attributes
+*attributes -- returns an array of attribute names as strings
+*attribute -- returns the specified Attr or AttrList object
+*parent -- returns the constructor of the parent, if one exists
 
 //method related
-respondsTo -- creates a method
-methods -- returns an array of method names as string
-method -- returns the specified Method object
+*respondsTo -- creates a method
+*methods -- returns an array of method names as string
+*method -- returns the specified Method object
 
 //constructor related
-isBuiltWith -- accepts a series of strings that should be attributes, those prepended with '%' are optional in the constructor
+*isBuiltWith -- accepts a series of strings that should be attributes, those prepended with '%' are optional in the constructor
             -- also accepts an initializer as the final argument
 
 //modifier
-isImmutable -- makes the object immutable and forces all attributes to be required in an isBuiltWith call
+*isImmutable -- makes the object immutable and forces all attributes to be required in an isBuiltWith call
 
 //inheritance
-isA -- inherits from the specified model
-isAn -- syntactic sugar for isA
+*isA -- inherits from the specified model
+*isAn -- syntactic sugar for isA
 
 Attr and AttrList objects respond to the following methods:
-validatesWith -- accepts a function that returns true if the parameter is valid for the attribute
-defaultsTo -- accepts a default value for the attribute (not currently available for AttrList)
-isImmutable -- makes it so the attribute cannot be changed once it is set
-addTo -- accepts an object to attach this attribute to
-and -- syntactic sugar, a pointer to the Attr object
-which -- syntactic sugar, a pointer to the Attr object
-eachOfWhich -- syntactic sugar, a pointer to the Attr object
+*validatesWith -- accepts a function that returns true if the parameter is valid for the attribute
+*defaultsTo -- accepts a default value for the attribute (not currently available for AttrList)
+*isImmutable -- makes it so the attribute cannot be changed once it is set
+*addTo -- accepts an object to attach this attribute to
+*and -- syntactic sugar, a pointer to the Attr object
+*which -- syntactic sugar, a pointer to the Attr object
+*eachOfWhich -- syntactic sugar, a pointer to the Attr object
 
 Attr and AttrList objects also have the following built-in validators
-isGreaterThan
-isLessThan
-isA
-isOneOf
+*isGreaterThan
+*isLessThan
+*isA
+*isOneOf
 
 You can set up your own validators by using the validatesWith or validateWith methods.
 Here, you set the error message with 'this.message'
@@ -170,5 +170,5 @@ this.message, you also can use this.param to access the setter's actual paramete
 AttrList also aliases 'validateWith' for 'validatesWith' to maintain grammatical consistency
 
 We hope to add the following self-explanatory functionality to Attr and AttrList:
-isNotNull
-isNotUndefined
+*isNotNull
+*isNotUndefined
