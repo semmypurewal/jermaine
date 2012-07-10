@@ -154,18 +154,18 @@ isOneOf
 You can set up your own validators by using the validatesWith or validateWith methods.
 Here, you set the error message with 'this.message'
 
-this.hasA("twoLetterWord").which.isA("string").and.validatesWith(function (word) {
-    this.message = word + "is not a two-letter string!"
-    return word.length() === 2;
-});
+    this.hasA("twoLetterWord").which.isA("string").and.validatesWith(function (word) {
+        this.message = word + "is not a two-letter string!"
+        return word.length() === 2;
+    });
 
 You can also add custom reusable validators to Attr objects. In addition to getting
 this.message, you also can use this.param to access the setter's actual parameter.
 
-Attr.addValidator("isNoLongerThan", function (val) {
-    this.message = this.param + " should be less than " + val;
-    return this.param.length() <= val;
-});
+    Attr.addValidator("isNoLongerThan", function (val) {
+        this.message = this.param + " should be less than " + val;
+        return this.param.length() <= val;
+    });
 
 AttrList also aliases 'validateWith' for 'validatesWith' to maintain grammatical consistency
 
