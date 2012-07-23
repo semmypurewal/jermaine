@@ -2,7 +2,7 @@
 
 describe("Validator", function () {
     "use strict";
-
+    var Validator = jermaine.Validator;
 
     xit("should throw an error on an empty parameter", function () {
 
@@ -14,5 +14,79 @@ describe("Validator", function () {
 
     xit("should return a function object that has the specified message as an attributes", function () {
 
+    });
+
+    describe("static addValidator method", function () {
+        it("should throw an error if the first parameter is absent or not a string", function () {
+            expect(function () {
+                Validator.addValidator();
+            }).toThrow(new Error("addValidator requires a name to be specified as the first parameter"));
+
+            expect(function () {
+                Validator.addValidator(5);
+            }).toThrow(new Error("addValidator requires a name to be specified as the first parameter"));
+        });
+
+        it("should throw an error if the second parameter is absent or not a function", function () {
+            expect(function () {
+                Validator.addValidator("isGreaterThan");
+            }).toThrow("addValidator requires a function as the second parameter");
+
+            expect(function () {
+                Validator.addValidator("isGreaterThan", 5);
+            }).toThrow("addValidator requires a function as the second parameter");
+        });
+
+        it("should add the validator object to the static validators list", function () {
+            expect(function () {
+                Validator.addValidator("isGreaterThan5", function (expected) {
+                    this.message = "Expected " + this.actual + " to be greater than 5";
+                    return this.actual > 5;
+                });
+            }).not.toThrow();
+        });
+
+        it("should throw an error if a validator is added that already exists", function () {
+            expect(function () {
+                Validator.addValidator("isGreaterThan5", function (thing) {
+                    return false;
+                });
+            }).toThrow("Validator 'isGreaterThan5' already defined");
+        });
+    });
+
+    describe("static getValidator method", function () {
+        it("should throw an error if there is no parameter specified", function () {
+            expect(function () {
+                Validator.getValidator();
+            }).toThrow("Validator: getValidator method requires a string parameter");
+        });
+
+        it("should throw an error if the parameter is not a string", function () {
+            expect(function () {
+                Validator.getValidator(5);
+            }).toThrow("Validator: parameter to getValidator method must be a string");
+        });
+
+        it("should throw an error if the validator does not exist", function () {
+            expect(function () {
+                Validator.getValidator("nonExistentValidator");
+            }).toThrow("Validator: 'nonExistentValidator' does not exist");
+        });
+
+        it("should return the specified validator function", function () {
+            var v = Validator.getValidator("isGreaterThan5");
+            expect(v).not.toBeUndefined();
+            expect(v()(6)).toBe(true);
+            expect(function () {
+                v()(4);
+            }).toThrow();
+        });
+    });
+
+    describe("validators method", function () {
+        xit("should return a list of validator names", function () {
+
+        });
     });
 });

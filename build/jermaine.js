@@ -1,6 +1,121 @@
+if (!window.jermaine) {
+    window.jermaine = {};
+}
+
+(function (ns) {
+    "use strict";
+    var that = this,
+        Validator,
+        validators = {};
+
+    Validator = function (spec) {
+        var validatorFunction = function (arg) {
+            var result, 
+                resultObject = {},
+                errorMessage;
+            result = spec.call(resultObject, arg);
+            if (!result) {
+                errorMessage = resultObject.message || "validator failed with parameter " + arg;
+                throw new Error(errorMessage);
+            }
+            return result;
+        };
+        return validatorFunction;
+    };
+
+    Validator.addValidator = function (name, v) {
+        if (name === undefined || typeof(name) !== "string") {
+            throw new Error("addValidator requires a name to be specified as the first parameter");
+        }
+
+        if (v === undefined || typeof(v) !== "function") {
+            throw new Error("addValidator requires a function as the second parameter");
+        }
+
+        if (validators[name] === undefined) {
+            validators[name] = function (expected) {
+                return new Validator(function (val) {
+                    var resultObject = {"actual":val, "param":val},
+                        result = v.call(resultObject, expected);
+                    this.message = resultObject.message;
+                    return result;
+                });
+            }
+        } else {
+            throw new Error("Validator '" + name +"' already defined");
+        }
+    };
+
+    Validator.getValidator = function (name) {
+        var result;
+
+        if (name === undefined) {
+            throw new Error("Validator: getValidator method requires a string parameter");
+        } else if (typeof (name) !== "string") {
+            throw new Error("Validator: parameter to getValidator method must be a string");
+        }
+
+        result = validators[name];
+
+        if (result === undefined) {
+            throw new Error("Validator: '" + name + "' does not exist");
+        }
+
+        return result;
+    };
+
+
+    Validator.validators = function () {
+        var prop,
+            result = [];
+        for (prop in validators) {
+            if (validators.hasOwnProperty(prop)) {
+                result.push(prop);
+            }
+        }
+
+        return result;
+    };
+
+    Validator.addValidator("isGreaterThan", function (val) {
+        this.message = this.param + " should be greater than " + val;
+        return this.param > val;
+    });
+
+    Validator.addValidator("isLessThan", function (val) {
+        this.message = this.param + " should be less than " + val;
+        return this.param < val;
+    });
+
+    Validator.addValidator("isA", function (val) {
+        var types = ["string", "number", "boolean", "function", "object"];
+        if (typeof(val) === "string" && types.indexOf(val) > -1) {
+            this.message = this.param + " should be a " + val;
+            return typeof(this.param) === val;
+        } else if (val === 'integer') {
+            // special case for 'integer'; since javascript has no integer type,
+            // just check for number type and check that it's numerically an int
+            if (this.param.toString !== undefined)  {
+                this.message = this.param.toString() + " should be an integer";
+            } else {
+                this.message = "parameter should be an integer";
+            }
+            return (typeof(this.param) === 'number') && (parseInt(this.param,10) === this.param);
+        } else if (typeof(val) === "string") {
+            throw new Error("Validator: isA accepts a string which is one of " + types);
+        } else {
+            throw new Error("Validator: isA only accepts a string for a primitive types for the time being");
+        }
+    });
+
+    Validator.addValidator("isOneOf", function (val) {
+        this.message = this.param + " should be one of the set: " + val;
+        return val.indexOf(this.param) > -1;
+    });
+
+    ns.Validator = Validator;
+}(window.jermaine));
 /*
-  + Why is validatorFunctions an array of objects keyed by the string 'validator', rather than just a list of functions?
-    Does it have to do with the comment about keeping the old API working?
   + what about isNotGreaterThan()?, isNotLessThan()?  Or, better still: a general 'not' operator, as in jasmine?
   + use of deprecated errorsWith in implementation of clone()?
 */
@@ -12,32 +127,27 @@ if(!window.jermaine) {
 (function (ns) {
     "use strict";
 
-    var validators = {};
+    var staticValidators = {};
 
     var Attr = function (name) {
-        var validatorFunctions = [],
+        var validators = [],
             that = this,
             errorMessage = "invalid setter call for " + name,
             defaultValueOrFunction,
             getDefaultValue,
             i,
             prop,
-            addDefaultValidator,
+            addValidator,
             immutable = false,
             validator,
-            AttrList = window.jermaine.AttrList;
+            AttrList = window.jermaine.AttrList,
+            Validator = window.jermaine.Validator;
+
 
         /* This is the validator that combines all the specified validators */
         validator = function (thingBeingValidated) {
-            var obj = {};
-            for (i = 0; i < validatorFunctions.length; ++i) {
-                //a little magic to keep the old API working
-                if (validatorFunctions[i].validator.call(obj, thingBeingValidated) === false) {
-                    if (obj.message !== undefined) {
-                        errorMessage = obj.message;
-                    }
-                    return false;
-                }
+            for (i = 0; i < validators.length; ++i) {
+                validators[i](thingBeingValidated);
             }
             return true;
         };
@@ -52,31 +162,16 @@ if(!window.jermaine) {
 
         this.validatesWith = function (v) {
             if (typeof(v) === 'function') {
-                validatorFunctions.push({ "validator" : v });
+                validators.push(new Validator(v));
                 return this;
             } else {
                 throw new Error("Attr: validator must be a function");
             }
         };
 
-        /* DEPRECATED */
-        this.errorsWith = function (error) {
-            if (typeof(error) === 'string') {
-                errorMessage = error;
-                return this;
-            } else {
-                throw new Error("Attr: errorsWith method requires string parameter");
-            }
-        };
-
         this.defaultsTo = function (value) {
             defaultValueOrFunction = value;
             return this;
-        };
-
-        /* DEPRECATED */
-        this.errorMessage = function () {
-            return errorMessage;
         };
 
         this.isImmutable = function () {
@@ -93,12 +188,11 @@ if(!window.jermaine) {
             var result = (this instanceof AttrList)?new AttrList(name):new Attr(name),
                 i;
 
-
-            for (i = 0; i < validatorFunctions.length; ++i) {
-                result.validatesWith(validatorFunctions[i].validator);
+            for (i = 0; i < validators.length; ++i) {
+                result.validatesWith(validators[i]);
             }
 
-            result.errorsWith(errorMessage).defaultsTo(defaultValueOrFunction);
+            result.defaultsTo(defaultValueOrFunction);
             if (immutable) {
                 result.isImmutable();
             }
@@ -150,88 +244,19 @@ if(!window.jermaine) {
             };
         };
 
-        //add a default validator
-        addDefaultValidator = function (name) {
-            that[name] = function (val) {
-                that.validatesWith(function (param) {
-                    var obj = {},
-                    result;
-                    obj.param = param;
-                    result = validators[name].call(obj, val);
-                    this.message = obj.message;
-                    return result;   
-                });
+        //add a single validator object to the attribute
+        addValidator = function (name) {
+            that[name] = function (param) {
+                validators.push(Validator.getValidator(name)(param));
                 return that;
             };
         };
 
-        //add default validator set
-        for (prop in validators) {
-            if (validators.hasOwnProperty(prop)) {
-                addDefaultValidator(prop, validators[prop]);
-            }
+        //add the validators to the attribute
+        for (i = 0; i < Validator.validators().length; ++i) {
+            addValidator(Validator.validators()[i]);
         }
     };
-
-    Attr.addValidator = function (name, v) {
-        if (name === undefined || typeof(name) !== "string") {
-            throw new Error("addValidator requires a name to be specified as the first parameter");
-        }
-
-        if (v === undefined || typeof(v) !== "function") {
-            throw new Error("addValidator requires a function as the second parameter");
-        }
-
-        if (validators[name] === undefined) {
-            validators[name] = v;
-        } else {
-            throw new Error("Validator '" + name +"' already defined");
-        }
-    };
-
-    Attr.addValidator("isGreaterThan", function (val) {
-        this.message = this.param + " should be greater than " + val;
-        return this.param > val;
-    });
-
-    Attr.addValidator("isLessThan", function (val) {
-        this.message = this.param + " should be less than " + val;
-        return this.param < val;
-    });
-
-    Attr.addValidator("isA", function (val) {
-        var types = ["string", "number", "boolean", "function", "object"];
-        if (typeof(val) === "string" && types.indexOf(val) > -1) {
-            this.message = this.param + " should be a " + val;
-            return typeof(this.param) === val;
-        } else if (val === 'integer') {
-            // special case for 'integer'; since javascript has no integer type,
-            // just check for number type and check that it's numerically an int
-            if (this.param.toString !== undefined)  {
-                this.message = this.param.toString() + " should be an integer";
-            } else {
-                this.message = "parameter should be an integer";
-            }
-            return (typeof(this.param) === 'number') && (parseInt(this.param,10) === this.param);
-        } else if (typeof(val) === "string") {
-            throw new Error("Attr: isA accepts a string which is one of " + types);
-        } else {
-            throw new Error("Attr: isA only accepts a string for a primitive types for the time being");
-
-            /*if (this.param.toString !== undefined)  {
-                this.message = this.param.toString() + " should be an Object";
-            } else {
-                this.message = "parameter should be an Object";
-            }
-            return this.param instanceof val;*/
-
-        }
-    });
-
-    Attr.addValidator("isOneOf", function (val) {
-        this.message = this.param + " should be one of the set: " + val;
-        return val.indexOf(this.param) > -1;
-    });
 
     ns.Attr = Attr;
 }(window.jermaine));

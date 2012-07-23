@@ -41,7 +41,7 @@ describe("Attr", function () {
         }).toThrow();
     });
 
-    describe("isGreaterThan method", function () {
+    describe("isGreaterThan validator", function () {
         it("once added to the object, it should throw an error if the argument is not greater than the parameter", function () {
             num.isGreaterThan(5);
             num.addTo(obj);
@@ -52,7 +52,7 @@ describe("Attr", function () {
         });
     });
 
-    describe("isLessThan method", function () {
+    describe("isLessThan validator", function () {
         it("once added to the object, it should throw an error if the argument is not less than the parameter", function () {
             num.isGreaterThan(5);
             num.isLessThan(10);
@@ -68,7 +68,7 @@ describe("Attr", function () {
         });
     });
 
-    describe("isA method", function () {
+    describe("isA validator", function () {
         it("once added to the object, it should throw an error if the argument is not the correct type", function () {
             num.isA("number").and.isGreaterThan(5).and.isLessThan(10);
 
@@ -95,8 +95,6 @@ describe("Attr", function () {
 
                 };
 
-              
-
             a = new Attr("thing");
             a.isA(Thing);
             t = new Thing();
@@ -120,7 +118,7 @@ describe("Attr", function () {
         });
     });
 
-    describe("isOneOf method", function () {
+    describe("isOneOf validator", function () {
         it("should throw an error if the parameter does not come from the specified set", function () {
             suit.isOneOf(suits);
             suit.addTo(Card);
@@ -371,49 +369,6 @@ describe("Attr", function () {
         });
     });
     
-    describe("static addValidator method", function () {
-        it("should throw an error if the first parameter is absent or not a string", function () {
-            expect(function () {
-                Attr.addValidator();
-            }).toThrow(new Error("addValidator requires a name to be specified as the first parameter"));
-
-            expect(function () {
-                Attr.addValidator(5);
-            }).toThrow(new Error("addValidator requires a name to be specified as the first parameter"));
-        });
-
-        it("should throw an error if the second parameter is absent or not a function", function () {
-            expect(function () {
-                Attr.addValidator("isGreaterThan");
-            }).toThrow("addValidator requires a function as the second parameter");
-
-            expect(function () {
-                Attr.addValidator("isGreaterThan", 5);
-            }).toThrow("addValidator requires a function as the second parameter");
-        });
-
-
-        it("should add the validator object to the static validators list", function () {
-            expect(function () {
-                Attr.addValidator("isGreaterThan5", function (thing) {
-                    this.message = "Expected " + thing + " to be greater than 5";
-                    return thing > 5;
-                });
-            }).not.toThrow();
-
-            expect((new Attr("whatever")).isGreaterThan5).not.toBeUndefined();
-        });
-
-        it("should throw an error if a validator is added that already exists", function () {
-            expect(function () {
-                Attr.addValidator("isGreaterThan5", function (thing) {
-                    return false;
-                });
-            }).toThrow("Validator 'isGreaterThan5' already defined");
-        });
-    });
-
-
     describe("full example", function () {
         it("should work with this example", function () {
             rank = new Attr("rank").which.isA('string').and.isOneOf(ranks);
