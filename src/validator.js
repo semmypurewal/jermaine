@@ -5,9 +5,7 @@ if (!window.jermaine) {
 (function (ns) {
     "use strict";
     var that = this,
-        Validator,
-        validators,
-        addDefaultValidator;
+        Validator;
 
     Validator = function (spec) {
         var validatorFunction = function (arg) {
@@ -20,7 +18,7 @@ if (!window.jermaine) {
                 throw new Error(errorMessage);
             }
             return result;
-        }
+        };
         return validatorFunction;
     };
 

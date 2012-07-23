@@ -762,16 +762,19 @@ describe("Model", function () {
         beforeEach(function () {
             Person = new Model();
             Person.hasA("name").which.validatesWith(function (name) {
+                this.message = "name must be at least 3 characters";
                 return name.length > 3;
-            }).and.errorsWith("name must be at least 3 characters");
+            });
             
             Person.hasAn("id").which.validatesWith(function (id) {
+                this.message = "id must be 9 digits";
                 return 100000000 <= id && id <= 999999999;
-            }).and.errorsWith("id must be 9 digits");
+            });
 
             Person.hasMany("friends").which.validateWith(function (friend) {
+                this.message = "friend must be a person";
                 return friend instanceof Person;
-            }).and.errorsWith("friend must be a person");
+            });
 
             Person.respondsTo("runsForOffice", function () {
                 return this.name() + " is running for office!";
@@ -828,8 +831,6 @@ describe("Model", function () {
 
             Person.isBuiltWith("firstName", "lastName", "%id");
 
-            //Person = Person.create();
-            
             expect(function () {
                 p = new Person("semmy");
             }).toThrow(new Error("Constructor requires firstName, lastName to be specified"));

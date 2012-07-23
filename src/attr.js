@@ -1,6 +1,4 @@
 /*
-  + Why is validatorFunctions an array of objects keyed by the string 'validator', rather than just a list of functions?
-    Does it have to do with the comment about keeping the old API working?
   + what about isNotGreaterThan()?, isNotLessThan()?  Or, better still: a general 'not' operator, as in jasmine?
   + use of deprecated errorsWith in implementation of clone()?
 */
@@ -12,10 +10,10 @@ if(!window.jermaine) {
 (function (ns) {
     "use strict";
 
-    var validators = {};
+    var staticValidators = {};
 
     var Attr = function (name) {
-        var validatorFunctions = [],
+        var validators = [],
             that = this,
             errorMessage = "invalid setter call for " + name,
             defaultValueOrFunction,
@@ -29,15 +27,8 @@ if(!window.jermaine) {
 
         /* This is the validator that combines all the specified validators */
         validator = function (thingBeingValidated) {
-            var obj = {};
-            for (i = 0; i < validatorFunctions.length; ++i) {
-                //a little magic to keep the old API working
-                if (validatorFunctions[i].validator.call(obj, thingBeingValidated) === false) {
-                    if (obj.message !== undefined) {
-                        errorMessage = obj.message;
-                    }
-                    return false;
-                }
+            for (i = 0; i < validators.length; ++i) {
+                validators[i](thingBeingValidated);
             }
             return true;
         };
@@ -52,7 +43,7 @@ if(!window.jermaine) {
 
         this.validatesWith = function (v) {
             if (typeof(v) === 'function') {
-                validatorFunctions.push({ "validator" : new jermaine.Validator(v) });
+                validators.push(new window.jermaine.Validator(v));
                 return this;
             } else {
                 throw new Error("Attr: validator must be a function");
@@ -60,14 +51,14 @@ if(!window.jermaine) {
         };
 
         /* DEPRECATED */
-        this.errorsWith = function (error) {
+        /*this.errorsWith = function (error) {
             if (typeof(error) === 'string') {
                 errorMessage = error;
                 return this;
             } else {
                 throw new Error("Attr: errorsWith method requires string parameter");
             }
-        };
+        };*/
 
         this.defaultsTo = function (value) {
             defaultValueOrFunction = value;
@@ -75,9 +66,9 @@ if(!window.jermaine) {
         };
 
         /* DEPRECATED */
-        this.errorMessage = function () {
+        /*this.errorMessage = function () {
             return errorMessage;
-        };
+        };*/
 
         this.isImmutable = function () {
             immutable = true;
@@ -93,12 +84,12 @@ if(!window.jermaine) {
             var result = (this instanceof AttrList)?new AttrList(name):new Attr(name),
                 i;
 
-
-            for (i = 0; i < validatorFunctions.length; ++i) {
-                result.validatesWith(validatorFunctions[i].validator);
+            for (i = 0; i < validators.length; ++i) {
+                result.validatesWith(validators[i]);
             }
 
-            result.errorsWith(errorMessage).defaultsTo(defaultValueOrFunction);
+            //result.errorsWith(errorMessage).defaultsTo(defaultValueOrFunction);
+            result.defaultsTo(defaultValueOrFunction);
             if (immutable) {
                 result.isImmutable();
             }
@@ -157,7 +148,7 @@ if(!window.jermaine) {
                     var obj = {},
                     result;
                     obj.param = param;
-                    result = validators[name].call(obj, val);
+                    result = staticValidators[name].call(obj, val);
                     this.message = obj.message;
                     return result;   
                 });
@@ -166,9 +157,9 @@ if(!window.jermaine) {
         };
 
         //add default validator set
-        for (prop in validators) {
-            if (validators.hasOwnProperty(prop)) {
-                addDefaultValidator(prop, validators[prop]);
+        for (prop in staticValidators) {
+            if (staticValidators.hasOwnProperty(prop)) {
+                addDefaultValidator(prop, staticValidators[prop]);
             }
         }
     };
@@ -182,8 +173,8 @@ if(!window.jermaine) {
             throw new Error("addValidator requires a function as the second parameter");
         }
 
-        if (validators[name] === undefined) {
-            validators[name] = v;
+        if (staticValidators[name] === undefined) {
+            staticValidators[name] = v;
         } else {
             throw new Error("Validator '" + name +"' already defined");
         }

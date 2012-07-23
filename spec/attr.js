@@ -258,40 +258,6 @@ describe("Attr", function () {
         });
     });
 
-    /* DEPRECATED */
-    describe("errorsWith method", function () {
-        xit("should set the error string", function () {
-            suit.errorsWith("suit must be one of 'clubs', 'diamonds', 'hearts', 'spades'");
-            suit.validatesWith(function (suit) {
-                return suits.indexOf(suit) > 0;                
-            });
-            suit.addTo(Card);
-            expect(function () {
-                Card.suit(5);
-            }).toThrow(new Error("suit must be one of 'clubs', 'diamonds', 'hearts', 'spades'"));
-        });
-
-        xit("should return the Attr object for cascading", function () {
-            expect(suit.errorsWith('hello world!')).toEqual(suit);
-        });
-
-        xit("should throw an error if the parameter is not a string", function () {
-            expect(function () {
-                suit.errorsWith(5);
-            }).toThrow(new Error("Attr: errorsWith method requires string parameter"));
-        });
-    });
-
-    /* DEPRECATED */
-    describe("errorMessage method", function () {
-        it("should return the error message once it is set", function () {
-            suit.errorsWith("Test Error Message");
-            expect(suit.errorMessage()).toEqual("Test Error Message");
-            suit.errorsWith("Test Error Messsage");
-            expect(suit.errorMessage()).toEqual("Test Error Messsage");
-        });
-    });
-
     describe("isMutable method", function () {
         beforeEach(function () {
             suit.isImmutable().and.validatesWith(function (suit) {
@@ -383,19 +349,18 @@ describe("Attr", function () {
         it("should clone all aspects of the attribute and return a new one", function () {
             var attribute = new Attr("test"),
                 validator = function () {
+                    this.message = "5 must be greater than 3";
                     return 5 > 3;
                 },
-                error = "5 must be greater than 3",
                 def = 5,
                 clonedAttr,
                 objA = {},
                 objB = {};
 
-            attribute.validatesWith(validator).and.errorsWith(error).and.defaultsTo(def);
+            attribute.validatesWith(validator).and.defaultsTo(def);
             clonedAttr = attribute.clone();
             
             expect(clonedAttr.validator()()).toBe(true);
-            expect(clonedAttr.errorMessage()).toBe(error);
             
             attribute.addTo(objA);
             clonedAttr.addTo(objB);
