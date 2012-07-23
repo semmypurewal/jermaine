@@ -50,25 +50,10 @@ if(!window.jermaine) {
             }
         };
 
-        /* DEPRECATED */
-        /*this.errorsWith = function (error) {
-            if (typeof(error) === 'string') {
-                errorMessage = error;
-                return this;
-            } else {
-                throw new Error("Attr: errorsWith method requires string parameter");
-            }
-        };*/
-
         this.defaultsTo = function (value) {
             defaultValueOrFunction = value;
             return this;
         };
-
-        /* DEPRECATED */
-        /*this.errorMessage = function () {
-            return errorMessage;
-        };*/
 
         this.isImmutable = function () {
             immutable = true;
@@ -88,7 +73,6 @@ if(!window.jermaine) {
                 result.validatesWith(validators[i]);
             }
 
-            //result.errorsWith(errorMessage).defaultsTo(defaultValueOrFunction);
             result.defaultsTo(defaultValueOrFunction);
             if (immutable) {
                 result.isImmutable();
