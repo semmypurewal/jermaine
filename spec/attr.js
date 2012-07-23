@@ -31,14 +31,14 @@ describe("Attr", function () {
         }).toThrow(new Error("Attr: constructor requires a name parameter which must be a string"));
     });
 
-    it("once added to an object, it should throw a default error if the set value doesn't pass the validator", function () {
+    it("should throw an error if the set value doesn't pass the validator", function () {
         suit.validatesWith(function (suit) {
             return suits.indexOf(suit) > 0;
         });
         suit.addTo(Card);
         expect(function () {
             Card.suit(4);
-        }).toThrow(new Error("invalid setter call for suit"));
+        }).toThrow();
     });
 
     describe("isGreaterThan method", function () {
@@ -147,7 +147,9 @@ describe("Attr", function () {
             };
             suit.validatesWith(v);
             expect(suit.validator()("hello")).toBe(true);
-            expect(suit.validator()("goodbye")).toBe(false);
+            expect(function () {
+                suit.validator()("goodbye");
+            }).toThrow();
         });
 
         it("should allow for a new error message to be set using this.message in the specified function", function () {
@@ -241,7 +243,7 @@ describe("Attr", function () {
             age.defaultsTo(-5);
             expect(function () {
                 age.addTo(obj);
-            }).toThrow("Attr: Default value of -5 does not pass validation for age");
+            }).toThrow();
         });
 
         it("should set the attribute to the parameter for all new objects", function () {
@@ -258,7 +260,7 @@ describe("Attr", function () {
 
     /* DEPRECATED */
     describe("errorsWith method", function () {
-        it("should set the error string", function () {
+        xit("should set the error string", function () {
             suit.errorsWith("suit must be one of 'clubs', 'diamonds', 'hearts', 'spades'");
             suit.validatesWith(function (suit) {
                 return suits.indexOf(suit) > 0;                
@@ -269,11 +271,11 @@ describe("Attr", function () {
             }).toThrow(new Error("suit must be one of 'clubs', 'diamonds', 'hearts', 'spades'"));
         });
 
-        it("should return the Attr object for cascading", function () {
+        xit("should return the Attr object for cascading", function () {
             expect(suit.errorsWith('hello world!')).toEqual(suit);
         });
 
-        it("should throw an error if the parameter is not a string", function () {
+        xit("should throw an error if the parameter is not a string", function () {
             expect(function () {
                 suit.errorsWith(5);
             }).toThrow(new Error("Attr: errorsWith method requires string parameter"));
@@ -329,7 +331,7 @@ describe("Attr", function () {
         it("should still validate it the first time it is set", function () {
             expect(function () {
                 Card.suit("notARealRank");
-            }).toThrow(new Error("invalid setter call for suit"));
+            }).toThrow(new Error("validator failed with parameter notARealRank"));
         });
 
         it("should throw an error if the setter is called once the attribute is set", function () {

@@ -1086,7 +1086,7 @@ describe("Model", function () {
 
         expect(function () {
             d.cards().add(5);
-        }).toThrow("invalid setter call for cards");
+        }).toThrow("validator failed with parameter 5");
 
         expect(function () {
             d.cards().at(5).suit("diamonds");

@@ -52,7 +52,7 @@ if(!window.jermaine) {
 
         this.validatesWith = function (v) {
             if (typeof(v) === 'function') {
-                validatorFunctions.push({ "validator" : v });
+                validatorFunctions.push({ "validator" : new jermaine.Validator(v) });
                 return this;
             } else {
                 throw new Error("Attr: validator must be a function");
