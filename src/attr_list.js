@@ -1,9 +1,6 @@
-if(!window.jermaine) {
-    window.jermaine = {};
-}
-
-(function (ns) {
+window.util.namespace("window.jermaine", function (ns) {
     "use strict";
+
     function AttrList(name) {
         var that = this;
 
@@ -76,4 +73,4 @@ if(!window.jermaine) {
     AttrList.prototype = new window.jermaine.Attr(name);
 
     ns.AttrList = AttrList;
-}(window.jermaine));
+});

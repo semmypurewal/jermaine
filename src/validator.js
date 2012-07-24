@@ -1,8 +1,4 @@
-if (!window.jermaine) {
-    window.jermaine = {};
-}
-
-(function (ns) {
+window.util.namespace("window.jermaine", function (ns) {
     "use strict";
     var that = this,
         Validator,
@@ -40,7 +36,7 @@ if (!window.jermaine) {
                     this.message = resultObject.message;
                     return result;
                 });
-            }
+            };
         } else {
             throw new Error("Validator '" + name +"' already defined");
         }
@@ -114,4 +110,4 @@ if (!window.jermaine) {
     });
 
     ns.Validator = Validator;
-}(window.jermaine));
+});

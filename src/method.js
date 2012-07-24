@@ -1,8 +1,4 @@
-if(!window.jermaine) {
-    window.jermaine = {};
-}
-
-(function (ns) {
+window.util.namespace("window.jermaine", function (ns) {
     "use strict";
 
     var Method = function (name, method) {
@@ -11,9 +7,7 @@ if(!window.jermaine) {
         } else if (!method || typeof(method) !== "function") {
             throw new Error("Method: second parameter must be a function");
         }
-
-
-
+        
         this.addTo = function (obj) {
             if (!obj || typeof(obj) !== 'object') {
                 throw new Error("Method: addTo method requires an object parameter");
@@ -23,4 +17,4 @@ if(!window.jermaine) {
         };
     };
     ns.Method = Method;
-}(window.jermaine));
+});

@@ -11,6 +11,7 @@
 
   <target name="concatenate">
     <concat destfile="${build.file}" fixlastline="yes" eol="lf">
+      <filelist dir="${lib.dir}" files="${lib.dependencies}" />
       <filelist dir="${src.dir}" files="${concatenate.order}" />
       <fileset dir="${src.dir}" includes="**/*.js" excludes="${concatenate.order}" />
     </concat>

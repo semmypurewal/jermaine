@@ -3,11 +3,7 @@
   + use of deprecated errorsWith in implementation of clone()?
 */
 
-if(!window.jermaine) {
-    window.jermaine = {};
-}
-
-(function (ns) {
+window.util.namespace("window.jermaine", function (ns) {
     "use strict";
 
     var staticValidators = {};
@@ -142,4 +138,4 @@ if(!window.jermaine) {
     };
 
     ns.Attr = Attr;
-}(window.jermaine));
+});

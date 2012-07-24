@@ -1,12 +1,4 @@
-if(!window.multigraph) {
-    window.multigraph = {};
-}
-
-if(!window.jermaine) {
-    window.jermaine = {};
-}
-
-(function (ns) {
+window.util.namespace("window.jermaine", function (ns) {
     "use strict";
     function Model(specification) {
         var that = this,
@@ -342,7 +334,5 @@ if(!window.jermaine) {
         return model;
     }
 
-
-
     ns.Model = Model;
-}(window.jermaine));
+});

@@ -2,7 +2,7 @@
 
 describe("Validator", function () {
     "use strict";
-    var Validator = jermaine.Validator;
+    var Validator = window.jermaine.Validator;
 
     xit("should throw an error on an empty parameter", function () {
 

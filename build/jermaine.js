@@ -1,8 +1,37 @@
-if (!window.jermaine) {
-    window.jermaine = {};
+if (!window.util) {
+    window.util = {};
 }
 
 (function (ns) {
+    ns.namespace = function (ns, func) {
+        var nsArray,
+            currentNS,
+            i,
+            nsAdditions = {};
+
+        //TODO: check to make sure ns is a properly formatted namespace string
+
+        //TODO: confirm func is actually a function
+
+        //parse namespace string
+        nsArray = ns.split(".");
+
+        //TODO: make sure root exists (can we do this for window?!?!?!?!)
+        currentNS = window;
+
+        //build namespace
+        for (i = 1; i < nsArray.length; ++i) {
+            if (currentNS[nsArray[i]] === undefined) {
+                console.log("building subnamespace " + nsArray[i]);
+                currentNS[nsArray[i]] = {};
+            }
+            currentNS = currentNS[nsArray[i]];
+        }
+
+        func(currentNS);
+    };
+}(window.util));
+window.util.namespace("window.jermaine", function (ns) {
     "use strict";
     var that = this,
         Validator,
@@ -40,7 +69,7 @@ if (!window.jermaine) {
                     this.message = resultObject.message;
                     return result;
                 });
-            }
+            };
         } else {
             throw new Error("Validator '" + name +"' already defined");
         }
@@ -114,17 +143,13 @@ if (!window.jermaine) {
     });
 
     ns.Validator = Validator;
-}(window.jermaine));
+});
 /*
   + what about isNotGreaterThan()?, isNotLessThan()?  Or, better still: a general 'not' operator, as in jasmine?
   + use of deprecated errorsWith in implementation of clone()?
 */
 
-if(!window.jermaine) {
-    window.jermaine = {};
-}
-
-(function (ns) {
+window.util.namespace("window.jermaine", function (ns) {
     "use strict";
 
     var staticValidators = {};
@@ -259,13 +284,10 @@ if(!window.jermaine) {
     };
 
     ns.Attr = Attr;
-}(window.jermaine));
-if(!window.jermaine) {
-    window.jermaine = {};
-}
-
-(function (ns) {
+});
+window.util.namespace("window.jermaine", function (ns) {
     "use strict";
+
     function AttrList(name) {
         var that = this;
 
@@ -338,12 +360,8 @@ if(!window.jermaine) {
     AttrList.prototype = new window.jermaine.Attr(name);
 
     ns.AttrList = AttrList;
-}(window.jermaine));
-if(!window.jermaine) {
-    window.jermaine = {};
-}
-
-(function (ns) {
+});
+window.util.namespace("window.jermaine", function (ns) {
     "use strict";
 
     var Method = function (name, method) {
@@ -352,9 +370,7 @@ if(!window.jermaine) {
         } else if (!method || typeof(method) !== "function") {
             throw new Error("Method: second parameter must be a function");
         }
-
-
-
+        
         this.addTo = function (obj) {
             if (!obj || typeof(obj) !== 'object') {
                 throw new Error("Method: addTo method requires an object parameter");
@@ -364,16 +380,8 @@ if(!window.jermaine) {
         };
     };
     ns.Method = Method;
-}(window.jermaine));
-if(!window.multigraph) {
-    window.multigraph = {};
-}
-
-if(!window.jermaine) {
-    window.jermaine = {};
-}
-
-(function (ns) {
+});
+window.util.namespace("window.jermaine", function (ns) {
     "use strict";
     function Model(specification) {
         var that = this,
@@ -709,7 +717,5 @@ if(!window.jermaine) {
         return model;
     }
 
-
-
     ns.Model = Model;
-}(window.jermaine));
+});
