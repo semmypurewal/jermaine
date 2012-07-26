@@ -1,36 +1,49 @@
-if (!window.util) {
-    window.util = {};
-}
-
 (function (ns) {
-    ns.namespace = function (ns, func) {
-        var nsArray,
+   "use strict";
+
+    var namespace = function (ns, func) {
+        var nsRegExp = /^([a-zA-Z]+)(\.[a-zA-Z]*)*$/,
+            nsArray,
             currentNS,
-            i,
-            nsAdditions = {};
+            i;
 
-        //TODO: check to make sure ns is a properly formatted namespace string
-
-        //TODO: confirm func is actually a function
+        //check to make sure ns is a properly formatted namespace string
+        if (ns.match(nsRegExp) === null || ns === "window") {
+            throw new Error("namespace: " + ns + " is a malformed namespace string");
+        }
 
         //parse namespace string
         nsArray = ns.split(".");
 
-        //TODO: make sure root exists (can we do this for window?!?!?!?!)
-        currentNS = window;
+        //set the root namespace to window (if it's not explictly stated)
+        currentNS = ("window" === nsArray[0])?window:window[nsArray[0]] = {};
+
+        //confirm func is actually a function
+        if (typeof(func) !== "function") {
+            throw new Error("namespace: second argument must be a function that accepts a namespace parameter");
+        }
 
         //build namespace
         for (i = 1; i < nsArray.length; ++i) {
             if (currentNS[nsArray[i]] === undefined) {
-                console.log("building subnamespace " + nsArray[i]);
                 currentNS[nsArray[i]] = {};
             }
             currentNS = currentNS[nsArray[i]];
         }
 
-        func(currentNS);
+        //if the function was defined, run it on the current namespace
+        if (func) {
+            func(currentNS);
+        }
+
+        //return namespace
+        return currentNS;
     };
-}(window.util));
+
+    return namespace(ns, function (exports) {
+        exports.namespace = namespace;
+    });
+}("window.util"));
 window.util.namespace("window.jermaine", function (ns) {
     "use strict";
     var that = this,
