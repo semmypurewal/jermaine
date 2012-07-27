@@ -1,4 +1,4 @@
-window.util.namespace("window.jermaine", function (ns) {
+window.jermaine.util.namespace("window.jermaine", function (ns) {
     "use strict";
 
     var Method = function (name, method) {

@@ -1,4 +1,4 @@
-window.util.namespace("window.jermaine", function (ns) {
+window.jermaine.util.namespace("window.jermaine", function (ns) {
     "use strict";
     function Model(specification) {
         var that = this,

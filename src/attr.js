@@ -3,7 +3,7 @@
   + use of deprecated errorsWith in implementation of clone()?
 */
 
-window.util.namespace("window.jermaine", function (ns) {
+window.jermaine.util.namespace("window.jermaine", function (ns) {
     "use strict";
 
     var staticValidators = {};
