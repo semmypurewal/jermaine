@@ -981,6 +981,17 @@ describe("Model", function () {
         }).toThrow("Model: specification parameter must be a function");
     });
 
+
+    it("should throw an error if the constructor is not called with the new operator", function () {
+        var p;
+
+        expect(function () {
+            p = Person();
+        }).toThrow("Model: instances must be created using the new operator");
+
+        
+    });
+
     it("should work with this example", function () {
         var Card,
         Deck,

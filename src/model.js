@@ -5,7 +5,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             methods = {},
             attributes = {},
             pattern,
-            modified = false,
+            modified = true,
             requiredConstructorArgs = [],
             optionalConstructorArgs = [],
             parents = [],
@@ -65,7 +65,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 throw new Error("Model: expected string argument to " + type + " method, but recieved " + name);
             }
 
-            result = type==="attribute"?attributes[name]:methods[name];
+            result = type==="attribute" ? attributes[name] : methods[name];
 
             if (result === undefined) {
                 throw new Error("Model: " + type + " " + name  + " does not exist!");
@@ -100,19 +100,27 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
             constructor = function () {
                 var i,
-                    addProperties = function (obj, type) {
-                        var properties = type==="attributes"?attributes:methods,
-                            i;
-                        for (i in properties) {
-                            if (properties.hasOwnProperty(i)) {
-                                //if the object is immutable, all attributes should be immutable
-                                if(properties === attributes && isImmutable) {
-                                    properties[i].isImmutable();
-                                }
-                                properties[i].addTo(obj);
+                    addProperties;
+
+
+                if (!(this instanceof model)) {
+                    throw new Error("Model: instances must be created using the new operator");
+                }
+
+                //utility function that adds methods and attributes
+                addProperties = function (obj, type) {
+                    var properties = type==="attributes" ? attributes : methods,
+                    i;
+                    for (i in properties) {
+                        if (properties.hasOwnProperty(i)) {
+                            //if the object is immutable, all attributes should be immutable
+                            if(properties === attributes && isImmutable) {
+                                properties[i].isImmutable();
                             }
+                            properties[i].addTo(obj);
                         }
-                    };
+                    }
+                };
 
 
                 //add attributes
