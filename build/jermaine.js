@@ -74,6 +74,38 @@
         exports.namespace = namespace;
     });
 }("window.jermaine.util"));
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
+        "use strict";
+        if (this == null) {
+            throw new TypeError();
+        }
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 0) {
+            n = Number(arguments[1]);
+            if (n != n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n != 0 && n != Infinity && n != -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    }
+}
 window.jermaine.util.namespace("window.jermaine", function (ns) {
     "use strict";
     var that = this,
@@ -431,7 +463,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             methods = {},
             attributes = {},
             pattern,
-            modified = false,
+            modified = true,
             requiredConstructorArgs = [],
             optionalConstructorArgs = [],
             parents = [],
@@ -491,7 +523,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 throw new Error("Model: expected string argument to " + type + " method, but recieved " + name);
             }
 
-            result = type==="attribute"?attributes[name]:methods[name];
+            result = type==="attribute" ? attributes[name] : methods[name];
 
             if (result === undefined) {
                 throw new Error("Model: " + type + " " + name  + " does not exist!");
@@ -526,19 +558,27 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
             constructor = function () {
                 var i,
-                    addProperties = function (obj, type) {
-                        var properties = type==="attributes"?attributes:methods,
-                            i;
-                        for (i in properties) {
-                            if (properties.hasOwnProperty(i)) {
-                                //if the object is immutable, all attributes should be immutable
-                                if(properties === attributes && isImmutable) {
-                                    properties[i].isImmutable();
-                                }
-                                properties[i].addTo(obj);
+                    addProperties;
+
+
+                if (!(this instanceof model)) {
+                    throw new Error("Model: instances must be created using the new operator");
+                }
+
+                //utility function that adds methods and attributes
+                addProperties = function (obj, type) {
+                    var properties = type==="attributes" ? attributes : methods,
+                    i;
+                    for (i in properties) {
+                        if (properties.hasOwnProperty(i)) {
+                            //if the object is immutable, all attributes should be immutable
+                            if(properties === attributes && isImmutable) {
+                                properties[i].isImmutable();
                             }
+                            properties[i].addTo(obj);
                         }
-                    };
+                    }
+                };
 
 
                 //add attributes
