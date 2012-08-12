@@ -92,9 +92,13 @@ describe("namespace utility", function () {
         var ns1, ns2, ns3, nsFunction;
 
         nsFunction = function (ns) {
+            var t = new this.Thing();
+
             expect(this.ns1).toBe(namespace("aliases.testOne"));
             expect(this.ns2).toBe(namespace("aliases.testTwo"));
             expect(this.ns2.Thing).not.toBeUndefined();
+            expect(this.Thing).not.toBeUndefined();
+            expect(t).not.toBeUndefined();
             ns.thing = this.ns2.Thing;
             ns.whatever = "hello world";
         };
@@ -106,7 +110,9 @@ describe("namespace utility", function () {
 
         ns3 = namespace("aliases.testThree",
                         { ns1: "aliases.testOne",
-                          ns2: "aliases.testTwo" },
+                          ns2: "aliases.testTwo",
+                          Thing: "aliases.testTwo.Thing"
+                        },
                         nsFunction);
 
 
