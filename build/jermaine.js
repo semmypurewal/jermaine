@@ -370,7 +370,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         ns.Attr.call(this, name);
 
         var delegate = function (obj, func) {
-            return function () { return obj[func].apply(that, arguments); };
+            return function () { return obj[func].apply(obj, arguments); };
         };
 
         //syntactic sugar to keep things grammatically correct

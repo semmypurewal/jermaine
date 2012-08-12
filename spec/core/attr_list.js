@@ -149,4 +149,26 @@ describe("AttrList", function () {
         });
 
     });
+
+    describe("pop method", function () {
+        it("should return the object which was popped", function () {
+            var lastObj = "mark",
+            poppedObj;
+            obj.friends().add("john");
+            obj.friends().add("semmy");
+            obj.friends().add(lastObj);
+            poppedObj = obj.friends().pop();
+            expect(poppedObj).toEqual(lastObj);
+        });
+
+        it("should decrease the size of the attr_list", function () {
+            var size;
+            obj.friends().add("john");
+            obj.friends().add("semmy");
+            obj.friends().add("mark");
+            size = obj.friends().size();
+            obj.friends().pop();
+            expect(obj.friends().size()).toEqual(size-1);
+        });
+    });
 });
