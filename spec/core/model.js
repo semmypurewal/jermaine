@@ -986,6 +986,7 @@ describe("Model", function () {
         var p;
 
         expect(function () {
+            /*jshint newcap:false */
             p = Person();
         }).toThrow("Model: instances must be created using the new operator");
 
