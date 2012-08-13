@@ -1,9 +1,10 @@
 window.jermaine.util.namespace("window.jermaine.util", function (ns) {
     "use strict";
     var EventEmitter = function () {
-        var listeners = {};
+        var that = this,
+            listeners = {};
 
-        //registers an event and a listener
+        //an registers event and a listener
         this.on = function (event, listener) {
             if (typeof(event) !== "string") {
                 throw new Error("EventEmitter: first argument to 'on' should be a string");
@@ -15,16 +16,20 @@ window.jermaine.util.namespace("window.jermaine.util", function (ns) {
                 listeners[event] = [];
             }
             listeners[event].push(listener);
-            return this;
+            return that;
         };
 
         //alias addListener
         this.addListener = this.on;
     
         this.once = function (event, listener) {
+            var f = function () {
+                listener(arguments);
+                that.removeListener(event, f);
+            };
 
-
-            return this;
+            that.on(event, f);
+            return that;
         };
 
         this.removeListener = function (event, listener) {
@@ -36,7 +41,7 @@ window.jermaine.util.namespace("window.jermaine.util", function (ns) {
             if (typeof(listener) !== "function") {
                 throw new Error("EventEmitter: second parameter must be a function to remove as an event listener");
             }
-            
+
             index = listeners[event].indexOf(listener);
 
             if (index !== -1) {
@@ -44,7 +49,7 @@ window.jermaine.util.namespace("window.jermaine.util", function (ns) {
                 listeners[event].splice(index,1);
             }
 
-            return this;
+            return that;
         };
 
         this.removeAllListeners = function (event) {
@@ -55,10 +60,12 @@ window.jermaine.util.namespace("window.jermaine.util", function (ns) {
             if (listeners[event] !== undefined) {
                 listeners[event] = [];
             }
+            
+            return that;
         };
     
         this.setMaxListeners = function (number) {
-            return this;
+            return that;
         };
 
         //get the listeners for an event
@@ -73,13 +80,26 @@ window.jermaine.util.namespace("window.jermaine.util", function (ns) {
 
         //execute each of the listeners in order with the specified arguments
         this.emit = function (event, data) {
-            var i;
+            var i,
+                params;
+
+
+            if (arguments.length > 1) {
+                params = [];
+            }
+
+            for (i = 1; i < arguments.length; ++i) {
+                params.push(arguments[i]);
+            }
+
             if (listeners[event] !== undefined) {
-                for(i = 0; i < listeners[event].length; i=i+1) {
-                    listeners[event][i](data);
+                for (i = 0; i < listeners[event].length; i=i+1) {
+                    listeners[event][i].apply(this, params);
                 }
             }
         };
+
+        return that;
     }; //end EventEmitter
 
     ns.EventEmitter = EventEmitter;
