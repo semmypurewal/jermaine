@@ -92,7 +92,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         /* private function that creates the constructor */
         create = function (name) {
             var that = this,
-                i,
+                i, j,
                 err;
 
             //validate the model first
@@ -100,6 +100,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
             constructor = function () {
                 var i,
+                    attribute,
                     addProperties;
 
 
@@ -132,7 +133,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 //use constructor args to build object
                 if(arguments.length > 0) {
                     if (arguments.length < requiredConstructorArgs.length) {
-                        //throw error
+                        //construct and throw error
                         err = "Constructor requires ";
                         for(i = 0; i < requiredConstructorArgs.length; ++i) {
                             err += requiredConstructorArgs[i];
@@ -146,10 +147,24 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     }
                     else {
                         for (i = 0; i < arguments.length; ++i) {
-                            if (i < requiredConstructorArgs.length) {
-                                this[requiredConstructorArgs[i]](arguments[i]);
+                            attribute = i < requiredConstructorArgs.length?
+                                requiredConstructorArgs[i]:
+                                optionalConstructorArgs[i-requiredConstructorArgs.length];
+
+
+                            if (model.attribute(attribute) instanceof AttrList) {
+                                //make sure that arguments[i] is an array
+                                if (Object.prototype.toString.call(arguments[i]) !== "[object Array]") {
+                                    throw new Error("Model: Constructor requires 'names' attribute to be set with an Array");
+                                } else {
+                                    //iterate over the array adding the elements
+                                    for (j = 0; j < arguments[i].length; ++j) {
+                                        this[attribute]().add(arguments[i][j]);
+                                    }
+                                }
                             } else {
-                                this[optionalConstructorArgs[i-requiredConstructorArgs.length]](arguments[i]);
+                                //go ahead and set it like normal
+                                this[attribute](arguments[i]);
                             }
                         }
                     }
