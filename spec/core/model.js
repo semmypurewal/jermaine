@@ -648,6 +648,7 @@ describe("Model", function () {
             }).not.toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the optional final parameter"));
         });
 
+
         it("should accept a function as an optional final argument", function () {
             var f = function () {
                 return true;
@@ -817,7 +818,9 @@ describe("Model", function () {
         });
 
         it("should allow for an empty constructor", function () {
-            
+            expect(function () {
+                var p = new Person();
+            }).not.toThrow();
         });
 
         it("should require the constructor to be called with the non-% parameters", function () {
@@ -951,11 +954,60 @@ describe("Model", function () {
             t3 = new Thing(20, 30, 40);
             expect(initializer).toHaveBeenCalled();
         });
+
+        it("should allow for AttrList attributes to be specified by isBuiltWith and initialized with a raw array", function () {
+            var Devil,
+                satan,
+                p1, p2, p3;
+            
+            Devil = new Model(function () {
+                this.hasA("number").which.isA("integer");
+                this.hasMany("names").eachOfWhich.isA("string");
+                this.isBuiltWith("number", "names");
+            });
+
+            expect(function () {
+                satan = new Devil(666);
+            }).toThrow("Constructor requires number, names to be specified");
+            
+            expect(satan).toBe(undefined);
+            
+            expect(function () {
+                satan = new Devil(666, 667);
+            }).toThrow("Model: Constructor requires 'names' attribute to be set with an Array");
+            
+            expect(function () {
+                satan = new Devil(666, ["lucifer", "beelzebub", 3]);
+            }).toThrow();
+
+            expect(satan).toBe(undefined);
+
+            expect(function () {
+                satan = new Devil(666, ["beelzebub", "lucifer", "prince of darkness"]);
+            }).not.toThrow();
+            
+            expect(satan).not.toBe(undefined);
+            
+            expect(satan.names().size()).toBe(3);
+            
+            Person.isBuiltWith("name", "id", "%friends");
+
+            p1 = new Person("Mark", 123456789);
+            p2 = new Person("John", 223456789);
+
+            expect(function () {
+                p3 = new Person("Semmy", 323456789, [p1, p2]);
+            }).not.toThrow();
+
+            expect(p3.friends().size()).toBe(2);
+        });
     });
+
+
 
     it("should allow for a specification function to be sent in that bootstraps the model", function () {
         var Person,
-        p;
+            p;
 
         Person = new Model(function () {
             this.hasA("firstName");
