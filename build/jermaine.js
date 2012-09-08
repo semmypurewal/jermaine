@@ -327,7 +327,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 });
 /*
   + what about isNotGreaterThan()?, isNotLessThan()?  Or, better still: a general 'not' operator, as in jasmine?
-  + use of deprecated errorsWith in implementation of clone()?
 */
 
 window.jermaine.util.namespace("window.jermaine", function (ns) {
@@ -346,9 +345,24 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             addValidator,
             immutable = false,
             validator,
+            emitter,
+            delegate,
             AttrList = window.jermaine.AttrList,
-            Validator = window.jermaine.Validator;
+            Validator = window.jermaine.Validator,
+            EventEmitter = window.jermaine.util.EventEmitter;
 
+
+
+        /* This is our event emitter */
+        emitter = new EventEmitter();
+
+        delegate = function (obj, func) {
+            return function () { return obj[func].apply(obj, arguments); };
+        };
+
+
+        this.on = delegate(emitter, "on");
+        this.emit = delegate(emitter, "emit");
 
         /* This is the validator that combines all the specified validators */
         validator = function (thingBeingValidated) {
@@ -409,7 +423,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         //syntactic sugar
         this.and = this;
         this.which = this;
-        this.eachOfWhich = this;
+        //this.eachOfWhich = this;
 
         this.validator = function () {
             return validator;
@@ -441,10 +455,12 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         throw new Error(errorMessage);
                     } else {
                         attribute = newValue;
+                        emitter.emit("set", newValue);
                     }
                     return obj;
                 } else {
                     //getter
+                    emitter.emit("get", attribute);
                     return attribute;
                 }
             };
@@ -494,6 +510,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         this.isMutable = function () {
             //no op
         };
+
+        this.eachOfWhich = this;
 
         this.addTo = function (obj) {
             var prop,

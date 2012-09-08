@@ -220,11 +220,7 @@ describe("Attr", function () {
         });
     });
 
-    describe("eachOfWhich syntactic sugar", function () {
-        it("should return the object", function () {
-            expect(suit.eachOfWhich).toEqual(suit);
-        });
-    });
+
 
     describe("defaultsTo method", function () {
         it("should validate the default value when it is added to an object", function () {
@@ -449,8 +445,42 @@ describe("Attr", function () {
             expect(fred.dog().name).toBe("rover");
             expect(count).toBe(2);
         });
-
     });
 
+    describe("on method", function () {
+        it("should be defined", function () {
+            expect(suit.on).not.toBeUndefined();
+        });
 
+        it("should accept a string and a function as an argument", function () {
+            expect(function () {
+                suit.on("set", function () {});
+            }).not.toThrow();
+        });
+    });
+
+    describe("emit method", function () {
+        var setSpy,
+            getSpy;
+
+        beforeEach(function () {
+            setSpy = jasmine.createSpy();
+            getSpy = jasmine.createSpy();
+        });
+
+        it("should be defined", function () {
+            expect(suit.emit).not.toBeUndefined();
+        });
+
+        it("should call the appropriate listener when the event is emitted", function () {
+            suit.on("set", setSpy);
+            suit.on("get", getSpy);
+            suit.addTo(obj);
+            obj.suit("hearts");
+            expect(setSpy).toHaveBeenCalledWith("hearts");
+            expect(getSpy).not.toHaveBeenCalled();
+            obj.suit();
+            expect(getSpy).toHaveBeenCalledWith("hearts");
+        });
+    });
 });

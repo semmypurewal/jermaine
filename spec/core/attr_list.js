@@ -24,6 +24,12 @@ describe("AttrList", function () {
         expect(al.validateWith).toBe(al.validatesWith);
     });
 
+    describe("eachOfWhich syntactic sugar", function () {
+        it("should return the object", function () {
+            expect(al.eachOfWhich).toEqual(al);
+        });
+    });
+
     describe("size method", function () {
         it("should be initialized to 0", function () {
             expect(obj.friends().size()).toEqual(0);
@@ -70,6 +76,8 @@ describe("AttrList", function () {
             }).toThrow(new Error("AttrList: Index out of bounds"));
         });
     });
+
+
 
     describe("add method", function () {
         it("should add an element to the end of the list", function () {

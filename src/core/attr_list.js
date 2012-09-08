@@ -27,6 +27,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             //no op
         };
 
+        this.eachOfWhich = this;
+
         this.addTo = function (obj) {
             var prop,
             arr = [],
