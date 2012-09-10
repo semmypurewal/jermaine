@@ -104,7 +104,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         }
     });
 
-    validators["isAn"] = validators["isA"];
+    validators.isAn = validators.isA;
 
     Validator.addValidator("isOneOf", function (val) {
         this.message = this.param + " should be one of the set: " + val;
