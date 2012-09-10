@@ -163,6 +163,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         };
         
         model.hasAn = model.hasA;
+        model.hasSome = model.hasA;
         
         model.hasMany = function (attrs) {
             return hasAProperty("AttrList", attrs);
