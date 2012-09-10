@@ -26,16 +26,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
 
 
-        /* This is our event emitter */
-        emitter = new EventEmitter();
-
-        delegate = function (obj, func) {
-            return function () { return obj[func].apply(obj, arguments); };
-        };
-
-
-        this.on = delegate(emitter, "on");
-        this.emit = delegate(emitter, "emit");
+        EventEmitter.call(this);
 
         /* This is the validator that combines all the specified validators */
         validator = function (thingBeingValidated) {
@@ -128,12 +119,12 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         throw new Error(errorMessage);
                     } else {
                         attribute = newValue;
-                        emitter.emit("set", newValue);
+                        that.emit("set", newValue);
                     }
                     return obj;
                 } else {
                     //getter
-                    emitter.emit("get", attribute);
+                    that.emit("get", attribute);
                     return attribute;
                 }
             };
