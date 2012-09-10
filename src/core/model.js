@@ -5,6 +5,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             methods = {},
             attributes = {},
             pattern,
+            getObserver,
+            setObserver,
             modified = true,
             requiredConstructorArgs = [],
             optionalConstructorArgs = [],
@@ -12,10 +14,12 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             Method = ns.Method,
             Attr = ns.Attr,
             AttrList = ns.AttrList,
+            EventEmitter = ns.util.EventEmitter,
             property,
             listProperties,
             create,
             isImmutable,
+            isObservable,
             initializer = function () {},
             constructor = function () {},
             model = function () {
@@ -24,6 +28,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 }
                 return constructor.apply(this, arguments);
             };
+
+
 
         //temporary fix so API stays the same
         if (arguments.length > 1) {
@@ -99,10 +105,10 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             model.validate();
 
             constructor = function () {
-                var i,
+                var that = this,
+                    i,
                     attribute,
                     addProperties;
-
 
                 if (!(this instanceof model)) {
                     throw new Error("Model: instances must be created using the new operator");
@@ -123,10 +129,38 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     }
                 };
 
+                setObserver = function (attributeName) {
+                    return function (data) {
+                        var update = {};
+                        update[attributeName] = data;
+                        that.emit("change", update);
+                    };
+                };
+
+                getObserver = function (attributeName) {
+                    return function (data) {
+                        var update = {};
+                        update[attributeName] = data;
+                        that.emit("access", update);
+                    };              
+                };
+
+                //observe everything if this is an observable model
+                if (isObservable) {
+                    EventEmitter.call(this);
+                    for (i in attributes) {
+                        if (attributes.hasOwnProperty(i)) {
+                            attributes[i].on("set", setObserver(i));
+                            attributes[i].on("get", getObserver(i));
+                        }
+                    }
+                }
 
                 //add attributes
                 addProperties(this, "attributes");
                 addProperties(this, "methods");
+
+
 
                 this.toString = pattern;
 
@@ -294,6 +328,10 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         
         model.isImmutable = function () {
             isImmutable = true;
+        };
+
+        model.isObservable = function () {
+            isObservable = true;
         };
 
         model.looksLike = function (p) {

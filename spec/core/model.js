@@ -637,6 +637,60 @@ describe("Model", function () {
         });
     });
 
+    describe("isObservable method", function () {
+        var p,
+            spy1,
+            spy2;
+
+        beforeEach(function () {
+            Person.hasA("name");
+            Person.hasAn("id");
+            spy1 = jasmine.createSpy();
+            spy2 = jasmine.createSpy();
+        });
+
+        it("should be defined", function () {
+            expect(Person.isObservable).toBeDefined();
+        });
+
+        it("should create an object that has an 'on' and an 'emit' method", function () {
+            Person.isObservable();
+            p = new Person();
+            expect(p.on).toBeDefined();
+            expect(typeof(p.on)).toBe("function");
+            expect(p.emit).toBeDefined();
+            expect(typeof(p.emit)).toBe("function");
+
+        });
+
+        it("should create an object that emits a 'change' event when an attribute is changed", function () {
+            Person.isObservable();
+            p = new Person();
+            p.on("change", spy1);
+            p.on("access", spy2);
+            p.name("semmy");
+            p.id(1234);
+            expect(spy1).toHaveBeenCalled();
+            expect(spy1.callCount).toBe(2);
+            expect(spy1).toHaveBeenCalledWith({name:"semmy"});
+            expect(spy1).toHaveBeenCalledWith({id:1234});
+            expect(spy2).not.toHaveBeenCalled();
+        });
+
+        it("should create an object that emits an 'access' event when an attribute is accessed", function () {
+            Person.isObservable();
+            p = new Person();
+            p.on("access", spy1);
+            p.name("semmy");
+            p.id(1234);
+            expect(spy1).not.toHaveBeenCalled();
+            p.name();
+            expect(spy1).toHaveBeenCalled();
+            expect(spy1).toHaveBeenCalledWith({name:"semmy"});
+            expect(spy1).not.toHaveBeenCalledWith({id:1234});
+        });
+    });
+
     describe("isBuiltWith method", function () {
         it("should take any number of string parameters", function () {
             expect(function () {
