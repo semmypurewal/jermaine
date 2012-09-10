@@ -118,6 +118,12 @@ describe("Attr", function () {
         });
     });
 
+    describe("isAn validator", function () {
+        it("should exist", function () {
+            expect(suit.isAn).toBeDefined();
+        });
+    });
+
     describe("isOneOf validator", function () {
         it("should throw an error if the parameter does not come from the specified set", function () {
             suit.isOneOf(suits);
