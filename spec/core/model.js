@@ -45,6 +45,12 @@ describe("Model", function () {
         });
     });
 
+    describe("hasSome method", function () {
+        it("should be an alias for the hasA method", function () {
+            expect(this.hasSome).toEqual(this.hasA);
+        });
+    });
+
     describe("hasMany method", function () {
         it("should create a new AttrList object with the specified name", function () {
             var al = Person.hasMany("friends");
