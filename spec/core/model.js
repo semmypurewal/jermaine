@@ -637,7 +637,7 @@ describe("Model", function () {
         });
     });
 
-    describe("isObservable method", function () {
+    describe("EventEmitter functionality", function () {
         var p,
             spy1,
             spy2;
@@ -649,12 +649,7 @@ describe("Model", function () {
             spy2 = jasmine.createSpy();
         });
 
-        it("should be defined", function () {
-            expect(Person.isObservable).toBeDefined();
-        });
-
         it("should create an object that has an 'on' and an 'emit' method", function () {
-            Person.isObservable();
             p = new Person();
             expect(p.on).toBeDefined();
             expect(typeof(p.on)).toBe("function");
@@ -664,7 +659,6 @@ describe("Model", function () {
         });
 
         it("should create an object that emits a 'change' event when an attribute is changed", function () {
-            Person.isObservable();
             p = new Person();
             p.on("change", spy1);
             p.on("access", spy2);
@@ -678,7 +672,6 @@ describe("Model", function () {
         });
 
         it("should create an object that emits an 'access' event when an attribute is accessed", function () {
-            Person.isObservable();
             p = new Person();
             p.on("access", spy1);
             p.name("semmy");
@@ -689,6 +682,52 @@ describe("Model", function () {
             expect(spy1).toHaveBeenCalledWith({name:"semmy"});
             expect(spy1).not.toHaveBeenCalledWith({id:1234});
         });
+
+        it("should emit appropriate events when it contains a submodel (hasA) that changes", function () {
+            var Dog,
+                d;
+
+            Dog = new Model(function () {
+                this.hasA("name");
+                this.hasA("breed");
+            });
+
+            d = new Dog();
+            d.name("Star").breed("Chow/Sheperd mix");
+
+            Person.hasA("dog").which.validatesWith(function (dog) {
+                return d instanceof Dog;
+            });
+
+
+            p = new Person();
+            p.on("change", function (data) {
+                if (data && data.hasOwnProperty("dog")) {
+                    console.log(data["dog"]);
+                    p.dog().on("change", function (data) {
+                        console.log("changed!");
+                        console.log(data);
+                        p.emit("change");
+                    });
+                }
+            });
+
+
+            p.name("semmy").id(1234).dog(d);
+
+
+
+
+
+            p.on("change", spy1);
+
+
+            p.dog().name("grace");
+            expect(spy1).toHaveBeenCalled();
+
+            console.log(p.dog().name());
+        });
+
     });
 
     describe("isBuiltWith method", function () {

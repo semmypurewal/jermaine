@@ -19,7 +19,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             listProperties,
             create,
             isImmutable,
-            isObservable,
             initializer = function () {},
             constructor = function () {},
             model = function () {
@@ -48,9 +47,15 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         /********** BEGIN PRIVATE METHODS ****************/
         /* private method that abstracts hasA/hasMany */
         var hasAProperty = function (type, name) {
-            var Property = type==="Attr"?Attr:AttrList,
-            methodName = type==="Attr"?"hasA":"hasMany",
-            attribute;
+            var Property,
+                methodName,
+                attribute;
+
+            //Property is one of Attr or AttrList
+            Property = type==="Attr"?Attr:AttrList;
+
+            //methodName is either hasA or hasMany
+            methodName = type==="Attr"?"hasA":"hasMany";
 
             modified = true;
             
@@ -129,6 +134,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     }
                 };
 
+
+                //private utility functions to make an object observable
                 setObserver = function (attributeName) {
                     return function (data) {
                         var update = {};
@@ -145,14 +152,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     };              
                 };
 
-                //observe everything if this is an observable model
-                if (isObservable) {
-                    EventEmitter.call(this);
-                    for (i in attributes) {
-                        if (attributes.hasOwnProperty(i)) {
-                            attributes[i].on("set", setObserver(i));
-                            attributes[i].on("get", getObserver(i));
-                        }
+                EventEmitter.call(this);
+                for (i in attributes) {
+                    if (attributes.hasOwnProperty(i)) {
+                        attributes[i].on("set", setObserver(i));
+                        attributes[i].on("get", getObserver(i));
                     }
                 }
 
@@ -328,10 +332,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         
         model.isImmutable = function () {
             isImmutable = true;
-        };
-
-        model.isObservable = function () {
-            isObservable = true;
         };
 
         model.looksLike = function (p) {
