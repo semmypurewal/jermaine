@@ -181,7 +181,7 @@ window.jermaine.util.namespace("window.jermaine.util", function (ns) {
             if (typeof(event) !== 'string') {
                 throw new Error("EventEmitter: listeners method must be called with the name of an event");
             } else if (listeners[event] === undefined) {
-                throw new Error("EventEmitter: event '" + event + "' has not yet been registered");
+                return [];
             }
             return listeners[event];
         };
@@ -397,6 +397,10 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             return this;
         };
 
+        this.name = function () {
+            return name;
+        };
+
         this.clone = function () {
             var result = (this instanceof AttrList)?new AttrList(name):new Attr(name),
                 i;
@@ -424,6 +428,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
         this.addTo = function (obj) {
             var attribute,
+                listener,
                 defaultValue;
 
             if (!obj || typeof(obj) !== 'object') {
@@ -437,8 +442,16 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             } else if (defaultValue !== undefined && !validator(defaultValue)) {
                 throw new Error("Attr: Default value of " + defaultValue + " does not pass validation for " + name);
             }
-            
+
             obj[name] = function (newValue) {
+                var emittedData = {},
+                    oldAttribute,
+                    cascadeEmitter;
+
+                cascadeEmitter = function (property, obj) {
+
+                };
+
                 if (newValue !== undefined) {
                     //setter
                     if (immutable && attribute !== undefined) {
@@ -447,8 +460,25 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     if (!validator(newValue)) {
                         throw new Error(errorMessage);
                     } else {
+                        if (obj.on && newValue.on) {
+                            //first, we remove the old listener if it exists
+                            if (attribute && attribute.listeners("change").length > 0 && typeof(listener) === "function") {
+                                attribute.removeListener("change", listener);
+                            }
+                            //then we create and add the new listener
+                            listener =  function (data) {
+                                var newData = {};
+                                newData[name] = data;
+                                obj.emit("change", newData);
+                            };
+                            newValue.on("change",listener);
+                        }
+
+                        //finally set the value
                         attribute = newValue;
+                        emittedData[name] = newValue;
                         that.emit("set", newValue);
+                        that.emit("change", emittedData);
                     }
                     return obj;
                 } else {
@@ -622,9 +652,15 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         /********** BEGIN PRIVATE METHODS ****************/
         /* private method that abstracts hasA/hasMany */
         var hasAProperty = function (type, name) {
-            var Property = type==="Attr"?Attr:AttrList,
-            methodName = type==="Attr"?"hasA":"hasMany",
-            attribute;
+            var Property,
+                methodName,
+                attribute;
+
+            //Property is one of Attr or AttrList
+            Property = type==="Attr"?Attr:AttrList;
+
+            //methodName is either hasA or hasMany
+            methodName = type==="Attr"?"hasA":"hasMany";
 
             modified = true;
             

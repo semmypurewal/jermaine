@@ -699,33 +699,15 @@ describe("Model", function () {
                 return d instanceof Dog;
             });
 
-
             p = new Person();
-            p.on("change", function (data) {
-                if (data && data.hasOwnProperty("dog")) {
-                    console.log(data["dog"]);
-                    p.dog().on("change", function (data) {
-                        console.log("changed!");
-                        console.log(data);
-                        p.emit("change");
-                    });
-                }
-            });
-
 
             p.name("semmy").id(1234).dog(d);
 
-
-
-
-
             p.on("change", spy1);
 
-
-            p.dog().name("grace");
+            p.dog().name("Grace");
             expect(spy1).toHaveBeenCalled();
-
-            console.log(p.dog().name());
+            expect(spy1).toHaveBeenCalledWith({dog:{name:"Grace"}});
         });
 
     });

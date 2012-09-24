@@ -73,7 +73,7 @@ window.jermaine.util.namespace("window.jermaine.util", function (ns) {
             if (typeof(event) !== 'string') {
                 throw new Error("EventEmitter: listeners method must be called with the name of an event");
             } else if (listeners[event] === undefined) {
-                throw new Error("EventEmitter: event '" + event + "' has not yet been registered");
+                return [];
             }
             return listeners[event];
         };

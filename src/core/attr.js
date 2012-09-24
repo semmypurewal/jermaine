@@ -68,6 +68,10 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             return this;
         };
 
+        this.name = function () {
+            return name;
+        };
+
         this.clone = function () {
             var result = (this instanceof AttrList)?new AttrList(name):new Attr(name),
                 i;
@@ -95,6 +99,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
         this.addTo = function (obj) {
             var attribute,
+                listener,
                 defaultValue;
 
             if (!obj || typeof(obj) !== 'object') {
@@ -108,8 +113,16 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             } else if (defaultValue !== undefined && !validator(defaultValue)) {
                 throw new Error("Attr: Default value of " + defaultValue + " does not pass validation for " + name);
             }
-            
+
             obj[name] = function (newValue) {
+                var emittedData = {},
+                    oldAttribute,
+                    cascadeEmitter;
+
+                cascadeEmitter = function (property, obj) {
+
+                };
+
                 if (newValue !== undefined) {
                     //setter
                     if (immutable && attribute !== undefined) {
@@ -118,8 +131,25 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     if (!validator(newValue)) {
                         throw new Error(errorMessage);
                     } else {
+                        if (obj.on && newValue.on) {
+                            //first, we remove the old listener if it exists
+                            if (attribute && attribute.listeners("change").length > 0 && typeof(listener) === "function") {
+                                attribute.removeListener("change", listener);
+                            }
+                            //then we create and add the new listener
+                            listener =  function (data) {
+                                var newData = {};
+                                newData[name] = data;
+                                obj.emit("change", newData);
+                            };
+                            newValue.on("change",listener);
+                        }
+
+                        //finally set the value
                         attribute = newValue;
+                        emittedData[name] = newValue;
                         that.emit("set", newValue);
+                        that.emit("change", emittedData);
                     }
                     return obj;
                 } else {

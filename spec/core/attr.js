@@ -3,6 +3,7 @@
 describe("Attr", function () {
     "use strict";
     var Attr = window.jermaine.Attr,
+        EventEmitter = window.jermaine.util.EventEmitter,
         suits = ['clubs', 'diamonds', 'hearts', 'spades'],
         suit,
         ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K'],
@@ -332,7 +333,34 @@ describe("Attr", function () {
             suit.addTo(Card);
             expect(Card.suit()).toBeUndefined();
         });
+        
+        it("should cascade 'change' events emitted to the object that it is added to, if that object is also an event emitter", function () {
+            var person = new Attr("person"),
+                d1 = new EventEmitter(),
+                d2 = new EventEmitter(),
+                dog = new Attr("dog"),
+                spy = jasmine.createSpy();
+            person.on("change", spy);
+            dog.addTo(person);
 
+            expect(person.dog).toBeDefined();
+            person.dog(d1);
+            expect(person.dog()).toBe(d1);
+            d1.emit("change", {hello:"world"});
+            expect(spy).toHaveBeenCalled();
+            expect(spy).toHaveBeenCalledWith({dog:{hello:"world"}});
+            person.dog(d2);
+            d1.emit("change", {hello:"World"});
+            expect(spy.callCount).toBe(1);
+            d2.emit("change", {another:"example"});
+            expect(spy.callCount).toBe(2);
+            expect(spy).toHaveBeenCalledWith({dog:{another:"example"}});
+            person.dog(d1);
+            d2.emit("change", {});
+            expect(spy.callCount).toBe(2);
+            d1.emit("change", {});
+            expect(spy.callCount).toBe(3);
+        });
     });
 
     describe("resulting getter/setter", function () {
