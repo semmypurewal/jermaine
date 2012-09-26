@@ -645,6 +645,7 @@ describe("Model", function () {
         beforeEach(function () {
             Person.hasA("name");
             Person.hasAn("id");
+            Person.hasA("friend");
             spy1 = jasmine.createSpy();
             spy2 = jasmine.createSpy();
         });
@@ -710,6 +711,51 @@ describe("Model", function () {
             expect(spy1).toHaveBeenCalledWith({dog:{name:"Grace"}});
         });
 
+        xit("should call an event emitter only when the instance of the model changes, not when the instance of another model changes", function () {
+            var p1, p2;
+            p1 = new Person();
+            p2 = new Person();
+
+            expect(spy1.callCount).toBe(0);
+            expect(spy2.callCount).toBe(0);
+
+            p1.on("change", spy1);
+            p2.on("change", spy2);
+
+            p1.name("semmy");
+            expect(spy1.callCount).toBe(1);
+            expect(spy2.callCount).toBe(0);
+        });
+
+
+        it("should not emit infinite events on circular attributes", function () {
+            var p1, p2;
+            p1 = new Person();
+            p2 = new Person();
+
+            expect(spy1.callCount).toBe(0)
+            expect(spy2.callCount).toBe(0)
+
+            p1.on("change", function (data) {
+                console.log("from p1: ");
+                console.log(data);
+                spy1();
+            });
+
+            p2.on("change", function (data) {
+                console.log("from p2: ");
+                console.log(data);
+                spy2();
+            });
+
+            p1.friend(p2);
+
+            expect(spy1.callCount).toBe(1);
+            expect(spy2.callCount).toBe(0);
+
+            //causes infinite loop
+            p2.friend(p1);
+        });
     });
 
     describe("isBuiltWith method", function () {
