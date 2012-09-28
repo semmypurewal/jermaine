@@ -116,12 +116,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
             obj[name] = function (newValue) {
                 var emittedData = {},
-                    oldAttribute,
-                    cascadeEmitter;
+                    oldAttribute;
 
-                cascadeEmitter = function (property, obj) {
-
-                };
 
                 if (newValue !== undefined) {
                     //setter
