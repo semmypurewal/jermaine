@@ -650,6 +650,11 @@ describe("Model", function () {
             spy2 = jasmine.createSpy();
         });
 
+        it("should result in instances of Models being instances of EventEmitter objects", function () {
+            p = new Person();
+            expect(p instanceof jermaine.util.EventEmitter).toBe(true);
+        });
+
         it("should create an object that has an 'on' and an 'emit' method", function () {
             p = new Person();
             expect(p.on).toBeDefined();

@@ -29,6 +29,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             };
 
 
+        //make instances of models instances of eventemitters
+        model.prototype = new EventEmitter();
 
         //temporary fix so API stays the same
         if (arguments.length > 1) {
