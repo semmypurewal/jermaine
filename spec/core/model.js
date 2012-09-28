@@ -727,8 +727,7 @@ describe("Model", function () {
             expect(spy2.callCount).toBe(0);
         });
 
-
-        it("should not emit infinite events on circular attributes", function () {
+        xit("should not emit infinite events on circular attributes", function () {
             var p1, p2;
             p1 = new Person();
             p2 = new Person();
