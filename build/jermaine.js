@@ -347,15 +347,12 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             addValidator,
             immutable = false,
             validator,
-            emitter,
             delegate,
             AttrList = window.jermaine.AttrList,
             Validator = window.jermaine.Validator,
             EventEmitter = window.jermaine.util.EventEmitter;
 
 
-
-        EventEmitter.call(this);
 
         /* This is the validator that combines all the specified validators */
         validator = function (thingBeingValidated) {
@@ -420,7 +417,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         //syntactic sugar
         this.and = this;
         this.which = this;
-        //this.eachOfWhich = this;
 
         this.validator = function () {
             return validator;
@@ -445,12 +441,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
             obj[name] = function (newValue) {
                 var emittedData = {},
-                    oldAttribute,
-                    cascadeEmitter;
-
-                cascadeEmitter = function (property, obj) {
-
-                };
+                    oldAttribute;
 
                 if (newValue !== undefined) {
                     //setter
@@ -460,7 +451,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     if (!validator(newValue)) {
                         throw new Error(errorMessage);
                     } else {
-                        if (obj.on && newValue.on) {
+                        if (obj instanceof EventEmitter && newValue.on) {
                             //first, we remove the old listener if it exists
                             if (attribute && attribute.listeners("change").length > 0 && typeof(listener) === "function") {
                                 attribute.removeListener("change", listener);
@@ -477,13 +468,13 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         //finally set the value
                         attribute = newValue;
                         emittedData[name] = newValue;
-                        that.emit("set", newValue);
-                        that.emit("change", emittedData);
+
+                        if (obj instanceof EventEmitter) {
+                            obj.emit("change", emittedData);
+                        }
                     }
                     return obj;
                 } else {
-                    //getter
-                    that.emit("get", attribute);
                     return attribute;
                 }
             };
@@ -634,6 +625,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             };
 
 
+        //make instances of models instances of eventemitters
+        model.prototype = new EventEmitter();
 
         //temporary fix so API stays the same
         if (arguments.length > 1) {
@@ -739,37 +732,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     }
                 };
 
-
-                //private utility functions to make an object observable
-                setObserver = function (attributeName) {
-                    return function (data) {
-                        var update = {};
-                        update[attributeName] = data;
-                        that.emit("change", update);
-                    };
-                };
-
-                getObserver = function (attributeName) {
-                    return function (data) {
-                        var update = {};
-                        update[attributeName] = data;
-                        that.emit("access", update);
-                    };              
-                };
-
                 EventEmitter.call(this);
-                for (i in attributes) {
-                    if (attributes.hasOwnProperty(i)) {
-                        attributes[i].on("set", setObserver(i));
-                        attributes[i].on("get", getObserver(i));
-                    }
-                }
 
                 //add attributes
                 addProperties(this, "attributes");
                 addProperties(this, "methods");
-
-
 
                 this.toString = pattern;
 

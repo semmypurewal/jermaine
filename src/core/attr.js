@@ -18,15 +18,12 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             addValidator,
             immutable = false,
             validator,
-            emitter,
             delegate,
             AttrList = window.jermaine.AttrList,
             Validator = window.jermaine.Validator,
             EventEmitter = window.jermaine.util.EventEmitter;
 
 
-
-        EventEmitter.call(this);
 
         /* This is the validator that combines all the specified validators */
         validator = function (thingBeingValidated) {
@@ -91,7 +88,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         //syntactic sugar
         this.and = this;
         this.which = this;
-        //this.eachOfWhich = this;
 
         this.validator = function () {
             return validator;
@@ -118,7 +114,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 var emittedData = {},
                     oldAttribute;
 
-
                 if (newValue !== undefined) {
                     //setter
                     if (immutable && attribute !== undefined) {
@@ -127,7 +122,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     if (!validator(newValue)) {
                         throw new Error(errorMessage);
                     } else {
-                        if (obj.on && newValue.on) {
+                        if (obj instanceof EventEmitter && newValue.on) {
                             //first, we remove the old listener if it exists
                             if (attribute && attribute.listeners("change").length > 0 && typeof(listener) === "function") {
                                 attribute.removeListener("change", listener);
@@ -144,13 +139,13 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         //finally set the value
                         attribute = newValue;
                         emittedData[name] = newValue;
-                        that.emit("set", newValue);
-                        that.emit("change", emittedData);
+
+                        if (obj instanceof EventEmitter) {
+                            obj.emit("change", emittedData);
+                        }
                     }
                     return obj;
                 } else {
-                    //getter
-                    that.emit("get", attribute);
                     return attribute;
                 }
             };

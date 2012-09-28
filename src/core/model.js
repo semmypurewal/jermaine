@@ -136,37 +136,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     }
                 };
 
-
-                //private utility functions to make an object observable
-                setObserver = function (attributeName) {
-                    return function (data) {
-                        var update = {};
-                        update[attributeName] = data;
-                        that.emit("change", update);
-                    };
-                };
-
-                getObserver = function (attributeName) {
-                    return function (data) {
-                        var update = {};
-                        update[attributeName] = data;
-                        that.emit("access", update);
-                    };              
-                };
-
                 EventEmitter.call(this);
-                for (i in attributes) {
-                    if (attributes.hasOwnProperty(i)) {
-                        attributes[i].on("set", setObserver(i));
-                        attributes[i].on("get", getObserver(i));
-                    }
-                }
 
                 //add attributes
                 addProperties(this, "attributes");
                 addProperties(this, "methods");
-
-
 
                 this.toString = pattern;
 

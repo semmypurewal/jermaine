@@ -335,31 +335,55 @@ describe("Attr", function () {
         });
         
         it("should cascade 'change' events emitted to the object that it is added to, if that object is also an event emitter", function () {
-            var person = new Attr("person"),
-                d1 = new EventEmitter(),
-                d2 = new EventEmitter(),
+            var person = new EventEmitter(),
                 dog = new Attr("dog"),
+                dogInstance1 = new EventEmitter(),
+                dogInstance2 = new EventEmitter(),
                 spy = jasmine.createSpy();
+
+
+            //make person an attribute
+            Attr.call(person, "person");
+
+            expect(person.on).toBeDefined();
+            expect(person.emit).toBeDefined();
+            expect(person.addTo).toBeDefined();
+
             person.on("change", spy);
             dog.addTo(person);
 
             expect(person.dog).toBeDefined();
-            person.dog(d1);
-            expect(person.dog()).toBe(d1);
-            d1.emit("change", {hello:"world"});
+            person.dog(dogInstance1);
+            expect(person.dog()).toBe(dogInstance1);
             expect(spy).toHaveBeenCalled();
-            expect(spy).toHaveBeenCalledWith({dog:{hello:"world"}});
-            person.dog(d2);
-            d1.emit("change", {hello:"World"});
             expect(spy.callCount).toBe(1);
-            d2.emit("change", {another:"example"});
+            expect(spy).toHaveBeenCalledWith({dog:dogInstance1});
+
+            dogInstance1.emit("change", {hello:"world"});
             expect(spy.callCount).toBe(2);
-            expect(spy).toHaveBeenCalledWith({dog:{another:"example"}});
-            person.dog(d1);
-            d2.emit("change", {});
-            expect(spy.callCount).toBe(2);
-            d1.emit("change", {});
+            expect(spy).toHaveBeenCalledWith({dog:{hello:"world"}});
+
+            
+            person.dog(dogInstance2);
             expect(spy.callCount).toBe(3);
+            expect(spy).toHaveBeenCalledWith({dog:dogInstance2});
+
+            //this should not call the spy
+            dogInstance1.emit("change", {hello:"World"});
+            expect(spy.callCount).toBe(3);
+
+            dogInstance2.emit("change", {another:"example"});
+            expect(spy.callCount).toBe(4);
+            expect(spy).toHaveBeenCalledWith({dog:{another:"example"}});
+            person.dog(dogInstance1);
+            expect(spy.callCount).toBe(5);
+
+            //this should not call the spy
+            dogInstance2.emit("change", {});
+            expect(spy.callCount).toBe(5);
+
+            dogInstance1.emit("change", {});
+            expect(spy.callCount).toBe(6);
         });
     });
 
@@ -456,7 +480,6 @@ describe("Attr", function () {
     });
 
     describe("default values as functions", function() {
-
         it("should call the function each time a default is assigned", function() {
             var Dog = function (name) {
                 this.name = name;
@@ -478,43 +501,6 @@ describe("Attr", function () {
             expect(jane.dog().name).toBe("spot");
             expect(fred.dog().name).toBe("rover");
             expect(count).toBe(2);
-        });
-    });
-
-    describe("on method", function () {
-        it("should be defined", function () {
-            expect(suit.on).not.toBeUndefined();
-        });
-
-        it("should accept a string and a function as an argument", function () {
-            expect(function () {
-                suit.on("set", function () {});
-            }).not.toThrow();
-        });
-    });
-
-    describe("emit method", function () {
-        var setSpy,
-            getSpy;
-
-        beforeEach(function () {
-            setSpy = jasmine.createSpy();
-            getSpy = jasmine.createSpy();
-        });
-
-        it("should be defined", function () {
-            expect(suit.emit).not.toBeUndefined();
-        });
-
-        it("should call the appropriate listener when the event is emitted", function () {
-            suit.on("set", setSpy);
-            suit.on("get", getSpy);
-            suit.addTo(obj);
-            obj.suit("hearts");
-            expect(setSpy).toHaveBeenCalledWith("hearts");
-            expect(getSpy).not.toHaveBeenCalled();
-            obj.suit();
-            expect(getSpy).toHaveBeenCalledWith("hearts");
         });
     });
 });
