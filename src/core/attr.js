@@ -135,7 +135,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                                         emit = false;
                                     }
                                 }
-                                if (emit) {
+                                if (emit && data.push) {
                                     data.push({key:name, origin:obj});
                                     obj.emit("change", data);
                                 }
