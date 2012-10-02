@@ -671,8 +671,8 @@ describe("Model", function () {
             p.id(1234);
             expect(spy1).toHaveBeenCalled();
             expect(spy1.callCount).toBe(2);
-            expect(spy1).toHaveBeenCalledWith({name:"semmy"});
-            expect(spy1).toHaveBeenCalledWith({id:1234});
+            expect(spy1).toHaveBeenCalledWith([{key:"name", value:"semmy", origin:p}]);
+            expect(spy1).toHaveBeenCalledWith([{key:"id", value:1234, origin:p}]);
         });
 
         it("should emit appropriate events when it contains a submodel (hasA) that changes", function () {
@@ -699,7 +699,7 @@ describe("Model", function () {
 
             p.dog().name("Grace");
             expect(spy1).toHaveBeenCalled();
-            expect(spy1).toHaveBeenCalledWith({dog:{name:"Grace"}});
+            expect(spy1).toHaveBeenCalledWith([{key:"name", value:"Grace", origin:d}, {key:"dog", origin:p}]);
         });
 
         it("should call an event emitter only when the instance of the model changes, not when the instance of another model changes", function () {
@@ -718,7 +718,7 @@ describe("Model", function () {
             expect(spy2.callCount).toBe(0);
         });
 
-        xit("should not emit infinite events on circular attributes", function () {
+        it("should not emit infinite events on circular attributes", function () {
             var p1, p2;
             p1 = new Person();
             p2 = new Person();
@@ -726,17 +726,8 @@ describe("Model", function () {
             expect(spy1.callCount).toBe(0);
             expect(spy2.callCount).toBe(0);
 
-            p1.on("change", function (data) {
-                console.log("from p1: ");
-                console.log(data);
-                spy1();
-            });
-
-            p2.on("change", function (data) {
-                console.log("from p2: ");
-                console.log(data);
-                spy2();
-            });
+            p1.on("change", spy1);
+            p2.on("change", spy2);
 
             p1.friend(p2);
 
@@ -744,7 +735,75 @@ describe("Model", function () {
             expect(spy2.callCount).toBe(0);
 
             //causes infinite loop
-            //p2.friend(p1);
+            p2.friend(p1);
+            expect(spy1.callCount).toBe(2);
+            expect(spy2.callCount).toBe(1);
+        });
+
+        it("should pass this second circular attribute test", function () {
+            var Dog,
+                Person,
+                p1, p2,
+                d1, d2, 
+                spyp1 = jasmine.createSpy(),
+                spyp2 = jasmine.createSpy(),
+                spyd1 = jasmine.createSpy(),
+                spyd2 = jasmine.createSpy();
+            
+
+            Dog = new Model(function () {
+                this.hasAn("owner").which.validatesWith(function (owner) {
+                    return owner instanceof Person;
+                });
+            });
+
+            Person = new Model(function () {
+                this.hasA("dog").which.validatesWith(function (dog) {
+                    return dog instanceof Dog;
+                });
+                this.hasA("friend").which.validatesWith(function (friend) {
+                    return friend instanceof Person;
+                });
+                
+                this.respondsTo("hasADog", function (dog) {
+                    this.dog(dog);
+                    dog.owner(this);
+                });
+
+                this.respondsTo("isFriendsWith", function (friend) {
+                    this.friend(friend);
+                    friend.friend(this);
+                });
+            });
+
+            p1 = new Person();
+            p2 = new Person();
+            d1 = new Dog();
+            d2 = new Dog();
+
+            p1.on("change", spyp1);
+            d1.on("change", spyd1);
+            p2.on("change", spyp2);
+            d2.on("change", spyd2);
+
+
+            p1.isFriendsWith(p2);
+            expect(spyp1.callCount).toBe(2); //p1's friend changes, then p2 (a subobject of p1)'s friend changes
+            expect(spyp2.callCount).toBe(1); //p2's friend changes
+            expect(spyd1.callCount).toBe(0);
+            expect(spyd2.callCount).toBe(0);
+
+            p1.hasADog(d1);
+            expect(spyp1.callCount).toBe(4); //p1's dog changes, then d1 (a subobject of d1)'s dog changes
+            expect(spyp2.callCount).toBe(1);
+            expect(spyd1.callCount).toBe(1);
+            expect(spyd2.callCount).toBe(0);
+
+            p2.hasADog(d2);
+            expect(spyp1.callCount).toBe(6);
+            expect(spyp2.callCount).toBe(3);
+            expect(spyd1.callCount).toBe(1);
+            expect(spyd2.callCount).toBe(1);
         });
     });
 

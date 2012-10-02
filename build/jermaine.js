@@ -440,8 +440,9 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             }
 
             obj[name] = function (newValue) {
-                var emittedData = {},
-                    oldAttribute;
+                var emittedData = [],
+                    emit = true,
+                    i;
 
                 if (newValue !== undefined) {
                     //setter
@@ -458,16 +459,23 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                             }
                             //then we create and add the new listener
                             listener =  function (data) {
-                                var newData = {};
-                                newData[name] = data;
-                                obj.emit("change", newData);
+                                for (i = 0; i < data.length && emit; ++i) {
+                                    if (data[i].origin === obj) {
+                                        emit = false;
+                                    }
+                                }
+                                if (emit) {
+                                    data.push({key:name, origin:obj});
+                                    obj.emit("change", data);
+                                }
                             };
                             newValue.on("change",listener);
                         }
 
                         //finally set the value
                         attribute = newValue;
-                        emittedData[name] = newValue;
+                        emittedData.push({key:name, value:newValue, origin:obj});
+                        //emittedData[name] = newValue;
 
                         if (obj instanceof EventEmitter) {
                             obj.emit("change", emittedData);
