@@ -19,6 +19,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             listProperties,
             create,
             isImmutable,
+            emitter,
             initializer = function () {},
             constructor = function () {},
             model = function () {
@@ -30,7 +31,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
 
         //make instances of models instances of eventemitters
-        model.prototype = new EventEmitter();
+        //model.prototype = new EventEmitter();
 
         //temporary fix so API stays the same
         if (arguments.length > 1) {
@@ -136,13 +137,18 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     }
                 };
 
-                EventEmitter.call(this);
+                emitter = new EventEmitter();
+                //expose the emit and the on methods
+                this.on = emitter.on;
+                this.emit = emitter.emit;
 
                 //add attributes
                 addProperties(this, "attributes");
                 addProperties(this, "methods");
 
-                this.toString = pattern;
+                if (pattern !== undefined) {
+                    this.toString = pattern;
+                }
 
                 //use constructor args to build object
                 if(arguments.length > 0) {

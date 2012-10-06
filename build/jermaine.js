@@ -452,7 +452,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     if (!validator(newValue)) {
                         throw new Error(errorMessage);
                     } else {
-                        if (obj instanceof EventEmitter && newValue.on) {
+                        if ((obj instanceof EventEmitter || obj.on && obj.emit) && newValue.on) {
                             //first, we remove the old listener if it exists
                             if (attribute && attribute.listeners("change").length > 0 && typeof(listener) === "function") {
                                 attribute.removeListener("change", listener);
@@ -475,9 +475,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         //finally set the value
                         attribute = newValue;
                         emittedData.push({key:name, value:newValue, origin:obj});
-                        //emittedData[name] = newValue;
 
-                        if (obj instanceof EventEmitter) {
+                        if ((obj instanceof EventEmitter || obj.on && obj.emit)) {
                             obj.emit("change", emittedData);
                         }
                     }
@@ -623,6 +622,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             listProperties,
             create,
             isImmutable,
+            emitter,
             initializer = function () {},
             constructor = function () {},
             model = function () {
@@ -634,7 +634,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
 
         //make instances of models instances of eventemitters
-        model.prototype = new EventEmitter();
+        //model.prototype = new EventEmitter();
 
         //temporary fix so API stays the same
         if (arguments.length > 1) {
@@ -740,13 +740,18 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     }
                 };
 
-                EventEmitter.call(this);
+                emitter = new EventEmitter();
+                //expose the emit and the on methods
+                this.on = emitter.on;
+                this.emit = emitter.emit;
 
                 //add attributes
                 addProperties(this, "attributes");
                 addProperties(this, "methods");
 
-                this.toString = pattern;
+                if (pattern !== undefined) {
+                    this.toString = pattern;
+                }
 
                 //use constructor args to build object
                 if(arguments.length > 0) {

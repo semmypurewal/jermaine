@@ -123,7 +123,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     if (!validator(newValue)) {
                         throw new Error(errorMessage);
                     } else {
-                        if (obj instanceof EventEmitter && newValue.on) {
+                        if ((obj instanceof EventEmitter || obj.on && obj.emit) && newValue.on) {
                             //first, we remove the old listener if it exists
                             if (attribute && attribute.listeners("change").length > 0 && typeof(listener) === "function") {
                                 attribute.removeListener("change", listener);
@@ -146,9 +146,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         //finally set the value
                         attribute = newValue;
                         emittedData.push({key:name, value:newValue, origin:obj});
-                        //emittedData[name] = newValue;
 
-                        if (obj instanceof EventEmitter) {
+                        if ((obj instanceof EventEmitter || obj.on && obj.emit)) {
                             obj.emit("change", emittedData);
                         }
                     }
