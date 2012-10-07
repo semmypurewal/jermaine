@@ -333,59 +333,6 @@ describe("Attr", function () {
             suit.addTo(Card);
             expect(Card.suit()).toBeUndefined();
         });
-        
-        it("should cascade 'change' events emitted to the object that it is added to, if that object is also an event emitter", function () {
-            var person = new EventEmitter(),
-                dog = new Attr("dog"),
-                dogInstance1 = new EventEmitter(),
-                dogInstance2 = new EventEmitter(),
-                spy = jasmine.createSpy();
-
-
-            //make person an attribute
-            Attr.call(person, "person");
-
-            expect(person.on).toBeDefined();
-            expect(person.emit).toBeDefined();
-            expect(person.addTo).toBeDefined();
-
-            person.on("change", spy);
-            dog.addTo(person);
-
-            expect(person.dog).toBeDefined();
-            person.dog(dogInstance1);
-            expect(person.dog()).toBe(dogInstance1);
-            expect(spy).toHaveBeenCalled();
-            expect(spy.callCount).toBe(1);
-            expect(spy).toHaveBeenCalledWith([{key:"dog", value:dogInstance1, origin:person}]);
-
-            dogInstance1.emit("change", [{key:"hello", value:"world", origin:dogInstance1}]);
-            expect(spy.callCount).toBe(2);
-            expect(spy).toHaveBeenCalledWith([{key:"hello", value:"world", origin:dogInstance1}, {key:"dog", origin:person}]);
-
-            
-            person.dog(dogInstance2);
-            expect(spy.callCount).toBe(3);
-            expect(spy).toHaveBeenCalledWith([{key:"dog", value:dogInstance2, origin:person}]);
-
-            //this should not call the spy
-            dogInstance1.emit("change", [ {key:"hello", value:"World", origin:dogInstance1} ]);
-            expect(spy.callCount).toBe(3);
-
-            //dogInstance2.emit("change", {another:"example"});
-            dogInstance2.emit("change", [ {key:"another", value:"example", origin:dogInstance2} ]);
-            expect(spy.callCount).toBe(4);
-            expect(spy).toHaveBeenCalledWith([{key:"another", value:"example", origin:dogInstance2}, {key:"dog", origin:person}]);
-            person.dog(dogInstance1);
-            expect(spy.callCount).toBe(5);
-
-            //this should not call the spy
-            dogInstance2.emit("change", [ {key:"another", value:"example", origin:dogInstance2} ]);
-            expect(spy.callCount).toBe(5);
-
-            dogInstance1.emit("change", [ {key:"hello", value:"World", origin:dogInstance1} ]);
-            expect(spy.callCount).toBe(6);
-        });
     });
 
     describe("resulting getter/setter", function () {

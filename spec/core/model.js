@@ -709,6 +709,7 @@ describe("Model", function () {
             p2.on("change", spy2);
 
             p1.name("semmy");
+
             expect(spy1.callCount).toBe(1);
             expect(spy2.callCount).toBe(0);
         });
@@ -799,6 +800,65 @@ describe("Model", function () {
             expect(spyp2.callCount).toBe(3);
             expect(spyd1.callCount).toBe(1);
             expect(spyd2.callCount).toBe(1);
+        });
+
+        it("should cascade 'change' events emitted from composed objects", function () {
+            var Person,
+                Dog,
+                p,
+                dog1,
+                dog2,
+                spy = jasmine.createSpy();
+
+            Person = new Model(function () {
+                this.hasA("name").which.isA("string");
+                this.hasA("dog").which.validatesWith(function (dog) {
+                    return dog instanceof Dog;
+                });
+                this.isBuiltWith("name");
+            });
+
+            Dog = new Model(function () {
+                this.hasA("name").which.isA("string");
+                this.isBuiltWith("name");
+            });
+
+            p = new Person("semmy");
+            dog1 = new Dog("gracie");
+            dog2 = new Dog("chico");
+
+            p.on("change", spy);
+
+            expect(p.dog).toBeDefined();
+            p.dog(dog1);
+            expect(p.dog()).toBe(dog1);
+            expect(spy).toHaveBeenCalled();
+            expect(spy.callCount).toBe(1);
+            expect(spy).toHaveBeenCalledWith([{key:"dog", value:dog1, origin:p}]);
+
+            dog1.name("ally");
+            expect(spy.callCount).toBe(2);
+            expect(spy).toHaveBeenCalledWith([{key:"name", value:"ally", origin:dog1}, {key:"dog", origin:p}]);
+
+            p.dog(dog2);
+            expect(spy.callCount).toBe(3);
+            expect(spy).toHaveBeenCalledWith([{key:"dog", value:dog2, origin:p}]);
+
+            dog1.name("loki");
+            expect(spy.callCount).toBe(3);
+
+            dog2.name("layla");
+            expect(spy.callCount).toBe(4);
+            expect(spy).toHaveBeenCalledWith([{key:"name", value:"layla", origin:dog2}, {key:"dog", origin:p}]);
+
+            p.dog(dog1);
+            expect(spy.callCount).toBe(5);
+            
+            dog2.name("beau");
+            expect(spy.callCount).toBe(5);
+
+            dog1.name("howie");
+            expect(spy.callCount).toBe(6);
         });
     });
 

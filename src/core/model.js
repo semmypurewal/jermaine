@@ -141,6 +141,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 //expose the emit and the on methods
                 this.on = emitter.on;
                 this.emit = emitter.emit;
+                this.listeners = emitter.listeners;
+                this.removeListener = emitter.removeListener;
 
                 //add attributes
                 addProperties(this, "attributes");
