@@ -19,10 +19,14 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             immutable = false,
             validator,
             delegate,
+            listeners = {},
             AttrList = window.jermaine.AttrList,
             Validator = window.jermaine.Validator,
             EventEmitter = window.jermaine.util.EventEmitter;
 
+
+        listeners.set = function () {};
+        listeners.get = function () {};
 
 
         /* This is the validator that combines all the specified validators */
@@ -93,6 +97,17 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             return validator;
         };
 
+
+        this.on = function (event, listener) {
+            if (event !== "set" && event !== "get") {
+                throw new Error("Attr: first argument to the 'on' method should be 'set' or 'get'");
+            } else if (typeof(listener) !== "function") {
+                throw new Error("Attr: second argument to the 'on' method should be a function");
+            } else {
+                listeners[event] = listener;
+            }
+        };
+
         this.addTo = function (obj) {
             var attribute,
                 listener,
@@ -147,6 +162,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         }
 
                         //finally set the value
+                        listeners.set(newValue);
                         attribute = newValue;
                         emittedData.push({key:name, value:newValue, origin:obj});
 
@@ -156,6 +172,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     }
                     return obj;
                 } else {
+                    listeners.get(attribute);
                     return attribute;
                 }
             };
