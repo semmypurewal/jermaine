@@ -656,7 +656,7 @@ describe("Model", function () {
             expect(typeof(p.on)).toBe("function");
             expect(p.emitter).toBeDefined();
             expect(typeof(p.emitter)).toBe("function");
-            expect(p.emitter() instanceof jermaine.util.EventEmitter);
+            expect(p.emitter() instanceof window.jermaine.util.EventEmitter);
         });
 
         it("should create an object that emits a 'change' event when an attribute is changed", function () {
@@ -859,6 +859,16 @@ describe("Model", function () {
 
             dog1.name("howie");
             expect(spy.callCount).toBe(6);
+        });
+
+        describe("on method", function () {
+            it("should reference 'this' as the current object, and not the underlying event emitter", function () {
+                var p = new Person();
+                p.on("change", function () {
+                    expect(this instanceof Person).toBe(true);
+                });
+                p.name("semmy");                
+            });
         });
     });
 

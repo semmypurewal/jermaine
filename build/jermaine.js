@@ -452,10 +452,10 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     if (!validator(newValue)) {
                         throw new Error(errorMessage);
                     } else {
-                        if ((obj instanceof EventEmitter || obj.on && obj.emit) && newValue.on) {
+                        if ((obj instanceof EventEmitter || obj.on && obj.emitter().emit) && newValue.on) {
                             //first, we remove the old listener if it exists
-                            if (attribute && attribute.listeners("change").length > 0 && typeof(listener) === "function") {
-                                attribute.removeListener("change", listener);
+                            if (attribute && attribute.emitter().listeners("change").length > 0 && typeof(listener) === "function") {
+                                attribute.emitter().removeListener("change", listener);
                             }
                             //then we create and add the new listener
                             listener =  function (data) {
@@ -464,20 +464,23 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                                         emit = false;
                                     }
                                 }
+
                                 if (emit && data.push) {
                                     data.push({key:name, origin:obj});
-                                    obj.emit("change", data);
+                                    obj.emitter().emit("change", data);
                                 }
                             };
-                            newValue.on("change",listener);
+                            if (newValue.on && newValue.emitter) {
+                                newValue.emitter().on("change", listener);
+                            }
                         }
 
                         //finally set the value
                         attribute = newValue;
                         emittedData.push({key:name, value:newValue, origin:obj});
 
-                        if ((obj instanceof EventEmitter || obj.on && obj.emit)) {
-                            obj.emit("change", emittedData);
+                        if ((obj instanceof EventEmitter || obj.on && obj.emitter().emit)) {
+                            obj.emitter().emit("change", emittedData);
                         }
                     }
                     return obj;
@@ -622,7 +625,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             listProperties,
             create,
             isImmutable,
-            emitter,
             initializer = function () {},
             constructor = function () {},
             model = function () {
@@ -719,6 +721,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 var that = this,
                     i,
                     attribute,
+                    emitter,
                     addProperties;
 
                 if (!(this instanceof model)) {
@@ -741,9 +744,17 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 };
 
                 emitter = new EventEmitter();
-                //expose the emit and the on methods
-                this.on = emitter.on;
-                this.emit = emitter.emit;
+
+                this.emitter = function () {
+                    return emitter;
+                };
+
+                //expose the the on method
+                this.on = function (event, listener) {
+                    that.emitter().on(event, function (data) {
+                        listener.call(that, data);
+                    });
+                };
 
                 //add attributes
                 addProperties(this, "attributes");

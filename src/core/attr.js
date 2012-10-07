@@ -135,12 +135,15 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                                         emit = false;
                                     }
                                 }
+
                                 if (emit && data.push) {
                                     data.push({key:name, origin:obj});
                                     obj.emitter().emit("change", data);
                                 }
                             };
-                            newValue.on("change",listener);
+                            if (newValue.on && newValue.emitter) {
+                                newValue.emitter().on("change", listener);
+                            }
                         }
 
                         //finally set the value

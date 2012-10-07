@@ -141,10 +141,14 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
                 this.emitter = function () {
                     return emitter;
-                }
+                };
 
                 //expose the the on method
-                this.on = this.emitter().on;
+                this.on = function (event, listener) {
+                    that.emitter().on(event, function (data) {
+                        listener.call(that, data);
+                    });
+                };
 
                 //add attributes
                 addProperties(this, "attributes");
