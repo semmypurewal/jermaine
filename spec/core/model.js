@@ -650,13 +650,13 @@ describe("Model", function () {
             spy2 = jasmine.createSpy();
         });
 
-        it("should create an object that has an 'on' and an 'emit' method", function () {
+        it("should create an object that has an 'on' method and an 'emitter' method", function () {
             p = new Person();
             expect(p.on).toBeDefined();
             expect(typeof(p.on)).toBe("function");
-            expect(p.emit).toBeDefined();
-            expect(typeof(p.emit)).toBe("function");
-
+            expect(p.emitter).toBeDefined();
+            expect(typeof(p.emitter)).toBe("function");
+            expect(p.emitter() instanceof jermaine.util.EventEmitter);
         });
 
         it("should create an object that emits a 'change' event when an attribute is changed", function () {

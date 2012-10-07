@@ -19,7 +19,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             listProperties,
             create,
             isImmutable,
-            emitter,
             initializer = function () {},
             constructor = function () {},
             model = function () {
@@ -116,6 +115,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 var that = this,
                     i,
                     attribute,
+                    emitter,
                     addProperties;
 
                 if (!(this instanceof model)) {
@@ -138,11 +138,13 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 };
 
                 emitter = new EventEmitter();
-                //expose the emit and the on methods
-                this.on = emitter.on;
-                this.emit = emitter.emit;
-                this.listeners = emitter.listeners;
-                this.removeListener = emitter.removeListener;
+
+                this.emitter = function () {
+                    return emitter;
+                }
+
+                //expose the the on method
+                this.on = this.emitter().on;
 
                 //add attributes
                 addProperties(this, "attributes");

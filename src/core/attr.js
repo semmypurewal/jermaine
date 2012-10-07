@@ -123,10 +123,10 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     if (!validator(newValue)) {
                         throw new Error(errorMessage);
                     } else {
-                        if ((obj instanceof EventEmitter || obj.on && obj.emit) && newValue.on) {
+                        if ((obj instanceof EventEmitter || obj.on && obj.emitter().emit) && newValue.on) {
                             //first, we remove the old listener if it exists
-                            if (attribute && attribute.listeners("change").length > 0 && typeof(listener) === "function") {
-                                attribute.removeListener("change", listener);
+                            if (attribute && attribute.emitter().listeners("change").length > 0 && typeof(listener) === "function") {
+                                attribute.emitter().removeListener("change", listener);
                             }
                             //then we create and add the new listener
                             listener =  function (data) {
@@ -137,7 +137,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                                 }
                                 if (emit && data.push) {
                                     data.push({key:name, origin:obj});
-                                    obj.emit("change", data);
+                                    obj.emitter().emit("change", data);
                                 }
                             };
                             newValue.on("change",listener);
@@ -147,8 +147,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         attribute = newValue;
                         emittedData.push({key:name, value:newValue, origin:obj});
 
-                        if ((obj instanceof EventEmitter || obj.on && obj.emit)) {
-                            obj.emit("change", emittedData);
+                        if ((obj instanceof EventEmitter || obj.on && obj.emitter().emit)) {
+                            obj.emitter().emit("change", emittedData);
                         }
                     }
                     return obj;
