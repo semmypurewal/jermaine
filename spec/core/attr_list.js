@@ -158,6 +158,88 @@ describe("AttrList", function () {
 
     });
 
+    describe("replace method", function () {
+        it("should replace the element at the specified index", function () {
+            obj.friends().add("john");
+            obj.friends().add("semmy");
+            expect(obj.friends().at(0)).toEqual("john");
+            expect(obj.friends().at(1)).toEqual("semmy");
+            expect(obj.friends().size()).toEqual(2);
+            obj.friends().replace(0, "mark");
+            expect(obj.friends().at(0)).toEqual("mark");
+            expect(obj.friends().at(1)).toEqual("semmy");
+            expect(obj.friends().size()).toEqual(2);
+
+            obj.friends().add("larry");
+            expect(obj.friends().at(0)).toEqual("mark");
+            expect(obj.friends().at(1)).toEqual("semmy");
+            expect(obj.friends().at(2)).toEqual("larry");
+            expect(obj.friends().size()).toEqual(3);
+            obj.friends().replace(2, "curly");
+            expect(obj.friends().at(0)).toEqual("mark");
+            expect(obj.friends().at(1)).toEqual("semmy");
+            expect(obj.friends().at(2)).toEqual("curly");
+            expect(obj.friends().size()).toEqual(3);
+        });
+
+        it("should throw an error when the index is not an integer", function () {
+            al.validatesWith(function (friend) {
+                this.message = "Invalid";
+                return typeof(friend) === 'string';
+            });
+            al.addTo(obj);
+            obj.friends().add("larry");
+            obj.friends().add("curly");
+            obj.friends().add("moe");
+
+            expect(function () {
+                obj.friends().replace("john", "semmy");
+            }).toThrow(new Error("AttrList: replace method requires index parameter to be an integer"));
+
+            expect(function () {
+                obj.friends().replace(1.5, "mark");
+            }).toThrow(new Error("AttrList: replace method requires index parameter to be an integer"));
+        });
+
+        it("should throw an error when the index is out of bounds", function () {
+            al.validatesWith(function (friend) {
+                this.message = "Invalid";
+                return typeof(friend) === 'string';
+            });
+            al.addTo(obj);
+            obj.friends().add("larry");
+            obj.friends().add("curly");
+            obj.friends().add("moe");
+
+            expect(function () {
+                obj.friends().replace(4, "semmy");
+            }).toThrow(new Error("AttrList: replace method index parameter out of bounds"));
+
+            expect(function () {
+                obj.friends().replace(-1, "mark");
+            }).toThrow(new Error("AttrList: replace method index parameter out of bounds"));
+        });
+
+        it("should throw an error when the object does not pass validation", function () {
+            al.validatesWith(function (friend) {
+                this.message = "Invalid";
+                return typeof(friend) === 'string';
+            });
+            al.addTo(obj);
+            obj.friends().add("larry");
+            obj.friends().add("curly");
+            obj.friends().add("moe");
+
+            expect(function () {
+                obj.friends().replace(1, 12);                
+            }).toThrow(new Error("Invalid"));
+
+            expect(function () {
+                obj.friends().replace(2, ["john", "mark", "semmy"]);                
+            }).toThrow(new Error("Invalid"));
+        });
+    });
+
     describe("pop method", function () {
         it("should return the object which was popped", function () {
             var lastObj = "mark",
