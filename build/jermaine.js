@@ -212,6 +212,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         }
     });
 
+    validators["isAn"] = validators["isA"];
+
     Validator.addValidator("isOneOf", function (val) {
         this.message = this.param + " should be one of the set: " + val;
         return val.indexOf(this.param) > -1;
@@ -405,6 +407,23 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     } else {
                         throw new Error(that.errorMessage());
                     }
+                };
+
+                actualList.replace = function (index, obj) {
+                    if ((typeof(index) !== 'number') || (parseInt(index, 10) !== index)) {
+                        throw new Error("AttrList: replace method requires index parameter to be an integer");
+                    }
+
+                    if (index < 0 || index >= this.size()) {
+                        throw new Error("AttrList: replace method index parameter out of bounds");
+                    }
+
+                    if (!(that.validator())(obj)) {
+                        throw new Error(that.errorMessage());
+                    }
+
+                    arr[index] = obj;
+                    return this;
                 };
 
                 actualList.at = function (index) {
@@ -621,6 +640,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         };
         
         model.hasAn = model.hasA;
+        model.hasSome = model.hasA;
         
         model.hasMany = function (attrs) {
             return hasAProperty("AttrList", attrs);
