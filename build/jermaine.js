@@ -452,7 +452,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     if (!validator(newValue)) {
                         throw new Error(errorMessage);
                     } else {
-                        if ((obj instanceof EventEmitter || obj.on && obj.emitter().emit) && newValue.on) {
+                        if ((obj instanceof EventEmitter || obj.on && obj.emitter().emit) && newValue !== null && newValue.on) {
                             //first, we remove the old listener if it exists
                             if (attribute && attribute.emitter().listeners("change").length > 0 && typeof(listener) === "function") {
                                 attribute.emitter().removeListener("change", listener);
