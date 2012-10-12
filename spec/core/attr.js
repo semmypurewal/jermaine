@@ -343,6 +343,19 @@ describe("Attr", function () {
             obj.x(0);
             expect(obj.x()).toBe(0);
         });
+
+        it("should allow the resulting value to be set to null, assuming it passes validator", function () {
+            var attr = new Attr("name");
+            attr.addTo(obj);
+            expect(obj.name).toBeDefined();
+            expect(function () {
+                obj.emitter = function () {
+                    return new EventEmitter();
+                };
+                obj.on = obj.emitter().on;
+                obj.name(null);
+            }).not.toThrow();
+        });
     });
 
     describe("clone method", function () {
