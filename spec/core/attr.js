@@ -452,12 +452,14 @@ describe("Attr", function () {
     describe("on method", function () {
         var name, 
             obj,
+            obj2,
             getSpy,
             setSpy;
 
         beforeEach(function () {
             name = new Attr("name").which.isA("string");
             obj = {};
+            obj2 = {};
             setSpy = jasmine.createSpy();
             getSpy = jasmine.createSpy();
         });
@@ -547,6 +549,26 @@ describe("Attr", function () {
             expect(setSpy.callCount).toBe(1);
             expect(getSpy.callCount).toBe(1);
             expect(ageSpy.callCount).toBe(2);
+        });
+
+        it("should work when the attribute is added to multiple objects, the 'this' reference should point to the calling object", function () {
+            name.on("set", function (newValue) {
+                setSpy(newValue, this);
+            });
+
+            name.addTo(obj);
+            name.addTo(obj2);
+
+            obj.name("hello");
+            expect(setSpy).toHaveBeenCalled();
+            expect(setSpy).toHaveBeenCalledWith("hello", obj);
+
+            obj2.name("world");
+            expect(setSpy.callCount).toBe(2);
+            expect(setSpy).toHaveBeenCalledWith("world", obj2);
+            
+            expect(setSpy).not.toHaveBeenCalledWith("hello", obj2);
+            expect(setSpy).not.toHaveBeenCalledWith("world", obj);
         });
     });
 });
