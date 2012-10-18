@@ -126,9 +126,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             }
 
             obj[name] = function (newValue) {
-                var emittedData = [],
-                    emit = true,
-                    i;
+                var preValue;
 
                 if (newValue !== undefined) {
                     //setter
@@ -138,11 +136,14 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     if (!validator(newValue)) {
                         throw new Error(errorMessage);
                     } else {
-                        //call the set listener
-                        listeners.set.call(obj, newValue);
+                        //get the oldValue
+                        preValue = attribute;
 
-                        //finally set the value
+                        //first set the value
                         attribute = newValue;
+
+                        //call the set listener
+                        listeners.set.call(obj, newValue, preValue);
                     }
                     return obj;
                 } else {

@@ -513,7 +513,7 @@ describe("Attr", function () {
 
             obj.name("semmy");
             expect(setSpy).toHaveBeenCalled();
-            expect(setSpy).toHaveBeenCalledWith("semmy");
+            expect(setSpy).toHaveBeenCalledWith("semmy", undefined);
             expect(getSpy).not.toHaveBeenCalled();
         });
 
@@ -526,7 +526,7 @@ describe("Attr", function () {
             obj.name("semmy");
             expect(setSpy).toHaveBeenCalled();
             expect(getSpy).not.toHaveBeenCalled();
-            expect(setSpy).toHaveBeenCalledWith("semmy");
+            expect(setSpy).toHaveBeenCalledWith("semmy", undefined);
             obj.name();
             expect(getSpy).toHaveBeenCalled();
             expect(getSpy).toHaveBeenCalledWith("semmy");
@@ -548,12 +548,12 @@ describe("Attr", function () {
             expect(setSpy).not.toHaveBeenCalled();
             expect(getSpy).not.toHaveBeenCalled();
             expect(ageSpy).toHaveBeenCalled();
-            expect(ageSpy).toHaveBeenCalledWith(50);
+            expect(ageSpy).toHaveBeenCalledWith(50, undefined);
 
             obj.name("semmy");
             expect(setSpy).toHaveBeenCalled();
             expect(getSpy).not.toHaveBeenCalled();
-            expect(setSpy).toHaveBeenCalledWith("semmy");
+            expect(setSpy).toHaveBeenCalledWith("semmy", undefined);
             obj.name();
             expect(getSpy).toHaveBeenCalled();
             expect(getSpy).toHaveBeenCalledWith("semmy");
@@ -582,6 +582,22 @@ describe("Attr", function () {
             
             expect(setSpy).not.toHaveBeenCalledWith("hello", obj2);
             expect(setSpy).not.toHaveBeenCalledWith("world", obj);
+        });
+
+        it("should call the listener with the newly set value AND the old value", function () {
+            name.on("set", setSpy);
+            name.addTo(obj);
+            name.addTo(obj2);
+
+            obj.name("semmy");
+            expect(setSpy.callCount).toBe(1);
+            expect(setSpy).toHaveBeenCalledWith("semmy", undefined);
+            obj.name("mark");
+            expect(setSpy.callCount).toBe(2);
+            expect(setSpy).toHaveBeenCalledWith("mark", "semmy");
+            obj.name("john");
+            expect(setSpy.callCount).toBe(3);
+            expect(setSpy).toHaveBeenCalledWith("john", "mark");
         });
     });
 });

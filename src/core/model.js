@@ -156,16 +156,14 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 addProperties(this, "methods");
 
                 var attr,
-                    preValue,
                     attrChangeListeners = {},
                     setHandler,
                     lastListener;
 
                 setHandler = function (attr) {
                     //when set handler is called, this should be the current object
-                    attr.on("set", function (newValue) {
+                    attr.on("set", function (newValue, preValue) {
                         var that = this;
-
 
                         if (attrChangeListeners[attr.name()] === undefined) {
                             attrChangeListeners[attr.name()] = function (data) {
@@ -189,7 +187,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         
                         //get current attribute
                         if (typeof(newValue) === "object" && newValue.on !== undefined && newValue.emitter !== undefined) {
-                            preValue = that[attr.name()](); //get the current value of the attribute
                             if (preValue !== undefined)  {
                                 preValue.emitter().removeListener("change", lastListener);
                             }
