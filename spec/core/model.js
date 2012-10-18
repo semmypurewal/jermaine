@@ -697,18 +697,20 @@ describe("Model", function () {
             expect(spy1).toHaveBeenCalledWith([{key:"name", value:"Grace", origin:d}, {key:"dog", origin:p}]);
         });
 
-        it("should call an event emitter only when the instance of the model changes, not when the instance of another model changes", function () {
+        it("should call an event emitter only when the instance of the model changes, not when an instance of another model changes", function () {
             var p1, p2;
             p1 = new Person();
             p2 = new Person();
 
+            p1.name("semmy");
+            p2.name("mark");
             expect(spy1.callCount).toBe(0);
             expect(spy2.callCount).toBe(0);
 
             p1.on("change", spy1);
             p2.on("change", spy2);
 
-            p1.name("semmy");
+            p1.name("bill");
 
             expect(spy1.callCount).toBe(1);
             expect(spy2.callCount).toBe(0);
@@ -719,21 +721,48 @@ describe("Model", function () {
             p1 = new Person();
             p2 = new Person();
 
+            p1.name("semmy");
+            p2.name("mark");
+
+            expect(p1.emitter().listeners("change").length).toBe(0);
+            expect(p2.emitter().listeners("change").length).toBe(0);
+
             expect(spy1.callCount).toBe(0);
             expect(spy2.callCount).toBe(0);
 
-            p1.on("change", spy1);
-            p2.on("change", spy2);
+            p1.emitter().on("change", function (data) {
+                spy1(data);
+            });
+            expect(p1.emitter().listeners("change").length).toBe(1);
+
+            p2.emitter().on("change", spy2);
+
+            expect(p2.emitter().listeners("change").length).toBe(1);
 
             p1.friend(p2);
+            expect(spy1).toHaveBeenCalledWith([{key:"friend", value:p2, origin:p1}]);
+            expect(p2.emitter().listeners("change").length).toBe(2);
 
             expect(spy1.callCount).toBe(1);
             expect(spy2.callCount).toBe(0);
 
-            //causes infinite loop
-            p2.friend(p1);
-            expect(spy1.callCount).toBe(2);
+            p2.name("mark");
+
+
             expect(spy2.callCount).toBe(1);
+            expect(spy2).toHaveBeenCalledWith([{key:"name", value:"mark", origin:p2}]);
+
+            expect(spy1.callCount).toBe(2);
+            expect(spy1).toHaveBeenCalledWith([{key:"name", value:"mark", origin:p2}, {key:"friend", origin: p1}]);
+
+
+            //should not cause an infinite loop
+            p2.friend(p1);
+
+            expect(spy2.callCount).toBe(2);
+            expect(spy2).toHaveBeenCalledWith([{key:"friend", value:p1, origin:p2}]);
+            expect(spy1.callCount).toBe(3);
+            expect(spy1).toHaveBeenCalledWith([{key:"friend", value:p1, origin:p2}, {key:"friend", origin:p1}]);
         });
 
         it("should pass this second circular attribute test", function () {
@@ -757,6 +786,7 @@ describe("Model", function () {
                 this.hasA("dog").which.validatesWith(function (dog) {
                     return dog instanceof Dog;
                 });
+
                 this.hasA("friend").which.validatesWith(function (friend) {
                     return friend instanceof Person;
                 });
@@ -782,24 +812,46 @@ describe("Model", function () {
             p2.on("change", spyp2);
             d2.on("change", spyd2);
 
-
             p1.isFriendsWith(p2);
             expect(spyp1.callCount).toBe(2); //p1's friend changes, then p2 (a subobject of p1)'s friend changes
+            expect(spyp1).toHaveBeenCalledWith([{key:"friend", value:p2, origin:p1}]);
+            expect(spyp1).toHaveBeenCalledWith([{key:"friend", value:p1, origin:p2}, {key:"friend", origin:p1}]);
             expect(spyp2.callCount).toBe(1); //p2's friend changes
+            expect(spyp2).toHaveBeenCalledWith([{key:"friend", value:p1, origin:p2}]);
             expect(spyd1.callCount).toBe(0);
             expect(spyd2.callCount).toBe(0);
 
             p1.hasADog(d1);
             expect(spyp1.callCount).toBe(4); //p1's dog changes, then d1 (a subobject of d1)'s dog changes
-            expect(spyp2.callCount).toBe(1);
+            expect(spyp1).toHaveBeenCalledWith([{key:"dog", value:d1, origin:p1}]);
+            expect(spyp1).toHaveBeenCalledWith([{key:"owner", value:p1, origin:d1}, {key:"dog", origin:p1}]);
+
+            expect(spyp2.callCount).toBe(3); //not true -- should be notified that p1's dog has changed, and that p1's dog's owner has changed
+            expect(spyp2).toHaveBeenCalledWith([{key:"dog", value:d1, origin:p1}, {key:"friend", origin:p2}]);
+            expect(spyp2).toHaveBeenCalledWith([{key:"owner", value:p1, origin:d1}, {key:"dog", origin:p1}, {key:"friend", origin:p2}]);
+
+
             expect(spyd1.callCount).toBe(1);
-            expect(spyd2.callCount).toBe(0);
+            expect(spyd1).toHaveBeenCalledWith([{key:"owner", value:p1, origin:d1}]);
+            expect(spyd2.callCount).toBe(0); //no change spyd2
 
             p2.hasADog(d2);
-            expect(spyp1.callCount).toBe(6);
-            expect(spyp2.callCount).toBe(3);
-            expect(spyd1.callCount).toBe(1);
+            expect(spyp2.callCount).toBe(5);
+
+            //as a result of p2's dog changing
+            expect(spyp2).toHaveBeenCalledWith([{key:"dog", value:d2, origin:p2}]);
+            expect(spyp1).toHaveBeenCalledWith([{key:"dog", value:d2, origin:p2}, {key:"friend", origin:p1}]);
+            expect(spyd1).toHaveBeenCalledWith([{key:"dog", value:d2, origin:p2}, {key:"friend", origin:p1}, {key:"owner", origin:d1}]);
+
+            //as a result of d2's owner changing
             expect(spyd2.callCount).toBe(1);
+            expect(spyd2).toHaveBeenCalledWith([{key:"owner", value:p2, origin:d2}]);
+            expect(spyp2).toHaveBeenCalledWith([{key:"owner", value:p2, origin:d2}, {key:"dog", origin:p2}]);
+           
+
+            expect(spyp1.callCount).toBe(6);
+            expect(spyp1).toHaveBeenCalledWith([{key:"owner", value:p2, origin:d2},{key:"dog", origin:p2}, {key:"friend", origin:p1}]);
+            expect(spyp1).toHaveBeenCalledWith([{key:"dog", value:d2, origin:p2}, {key:"friend", origin:p1}]);
         });
 
         it("should cascade 'change' events emitted from composed objects", function () {
@@ -828,22 +880,31 @@ describe("Model", function () {
             dog2 = new Dog("chico");
 
             p.on("change", spy);
+            expect(p.emitter().listeners("change").length).toBe(1);
 
             expect(p.dog).toBeDefined();
             p.dog(dog1);
+            expect(dog1.emitter().listeners("change").length).toBe(1);
             expect(p.dog()).toBe(dog1);
             expect(spy).toHaveBeenCalled();
             expect(spy.callCount).toBe(1);
             expect(spy).toHaveBeenCalledWith([{key:"dog", value:dog1, origin:p}]);
 
             dog1.name("ally");
+
             expect(spy.callCount).toBe(2);
             expect(spy).toHaveBeenCalledWith([{key:"name", value:"ally", origin:dog1}, {key:"dog", origin:p}]);
 
+            expect(dog1.emitter().listeners("change").length).toBe(1);
+            expect(dog2.emitter().listeners("change").length).toBe(0);
             p.dog(dog2);
+            expect(dog1.emitter().listeners("change").length).toBe(0);
+            expect(dog2.emitter().listeners("change").length).toBe(1);
+
             expect(spy.callCount).toBe(3);
             expect(spy).toHaveBeenCalledWith([{key:"dog", value:dog2, origin:p}]);
 
+            //should not call the p's spy since dog1 is no longer attached to p1
             dog1.name("loki");
             expect(spy.callCount).toBe(3);
 

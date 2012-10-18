@@ -227,8 +227,6 @@ describe("Attr", function () {
         });
     });
 
-
-
     describe("defaultsTo method", function () {
         it("should validate the default value when it is added to an object", function () {
             var spy = jasmine.createSpy(),
@@ -408,7 +406,6 @@ describe("Attr", function () {
 
 
     describe("integer validation", function() {
-
         it("should not throw an error when an integer is assigned", function() {
             var index = new Attr("index").which.isA('integer');
             var obj = {};
@@ -462,6 +459,129 @@ describe("Attr", function () {
             expect(jane.dog().name).toBe("spot");
             expect(fred.dog().name).toBe("rover");
             expect(count).toBe(2);
+        });
+    });
+
+    describe("on method", function () {
+        var name, 
+            obj,
+            obj2,
+            getSpy,
+            setSpy;
+
+        beforeEach(function () {
+            name = new Attr("name").which.isA("string");
+            obj = {};
+            obj2 = {};
+            setSpy = jasmine.createSpy();
+            getSpy = jasmine.createSpy();
+        });
+
+        it("should be defined", function () {
+            expect(name.on).not.toBe(undefined);
+        });
+
+        it("should throw an error if the event parameter is not 'set' or 'get'", function () {
+            expect(function () {
+                name.on("sets", function () {});
+            }).toThrow("Attr: first argument to the 'on' method should be 'set' or 'get'");
+            
+            expect(function () {
+                name.on("set", function () {});
+            }).not.toThrow();
+
+            expect(function () {
+                name.on("get", function () {});
+            }).not.toThrow();
+        });
+
+        it("should throw an error if the listener parameter is not a function", function () {
+            expect(function () {
+                name.on("set", 6);
+            }).toThrow("Attr: second argument to the 'on' method should be a function");
+
+            expect(function () {
+                name.on("set", function () {});
+            }).not.toThrow();
+        });
+
+        it("should call the set listener when the attribute is set", function () {
+            name.on("set", setSpy);
+            name.on("get", getSpy);
+
+            name.addTo(obj);
+
+            obj.name("semmy");
+            expect(setSpy).toHaveBeenCalled();
+            expect(setSpy).toHaveBeenCalledWith("semmy");
+            expect(getSpy).not.toHaveBeenCalled();
+        });
+
+        it("should call the get listener when the attribute is set", function () {
+            name.on("set", setSpy);
+            name.on("get", getSpy);
+
+            name.addTo(obj);
+
+            obj.name("semmy");
+            expect(setSpy).toHaveBeenCalled();
+            expect(getSpy).not.toHaveBeenCalled();
+            expect(setSpy).toHaveBeenCalledWith("semmy");
+            obj.name();
+            expect(getSpy).toHaveBeenCalled();
+            expect(getSpy).toHaveBeenCalledWith("semmy");
+        });
+
+        it("should work on multiple attributes", function () {
+            var age = new Attr("age").which.isAn("integer"),
+                ageSpy = jasmine.createSpy();
+
+            name.on("set", setSpy);
+            name.on("get", getSpy);
+            age.on("set", ageSpy);
+            age.on("get", ageSpy);
+
+            name.addTo(obj);
+            age.addTo(obj);
+
+            obj.age(50);
+            expect(setSpy).not.toHaveBeenCalled();
+            expect(getSpy).not.toHaveBeenCalled();
+            expect(ageSpy).toHaveBeenCalled();
+            expect(ageSpy).toHaveBeenCalledWith(50);
+
+            obj.name("semmy");
+            expect(setSpy).toHaveBeenCalled();
+            expect(getSpy).not.toHaveBeenCalled();
+            expect(setSpy).toHaveBeenCalledWith("semmy");
+            obj.name();
+            expect(getSpy).toHaveBeenCalled();
+            expect(getSpy).toHaveBeenCalledWith("semmy");
+
+            obj.age();
+            expect(setSpy.callCount).toBe(1);
+            expect(getSpy.callCount).toBe(1);
+            expect(ageSpy.callCount).toBe(2);
+        });
+
+        it("should work when the attribute is added to multiple objects, the 'this' reference should point to the calling object", function () {
+            name.on("set", function (newValue) {
+                setSpy(newValue, this);
+            });
+
+            name.addTo(obj);
+            name.addTo(obj2);
+
+            obj.name("hello");
+            expect(setSpy).toHaveBeenCalled();
+            expect(setSpy).toHaveBeenCalledWith("hello", obj);
+
+            obj2.name("world");
+            expect(setSpy.callCount).toBe(2);
+            expect(setSpy).toHaveBeenCalledWith("world", obj2);
+            
+            expect(setSpy).not.toHaveBeenCalledWith("hello", obj2);
+            expect(setSpy).not.toHaveBeenCalledWith("world", obj);
         });
     });
 });

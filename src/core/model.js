@@ -149,10 +149,68 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         listener.call(that, data);
                     });
                 };
+                //this.on = this.emitter().on;
 
                 //add attributes
                 addProperties(this, "attributes");
                 addProperties(this, "methods");
+
+                var attr,
+                    preValue,
+                    attrChangeListeners = {},
+                    setHandler,
+                    lastListener;
+
+                setHandler = function (attr) {
+                    //when set handler is called, this should be the current object
+                    attr.on("set", function (newValue) {
+                        var that = this;
+
+
+                        if (attrChangeListeners[attr.name()] === undefined) {
+                            attrChangeListeners[attr.name()] = function (data) {
+                                var newData = [],
+                                    emit = true;
+
+                                for (i = 0; i < data.length && emit === true; ++i) {
+                                    newData.push(data[i]);
+                                    if (data[i].origin === this) {
+                                        emit = false;
+                                    }
+                                }
+
+                                if (emit) {
+                                    //maybe we should manipulate the data directly? copy it and emit a new data object?
+                                    newData.push({key:attr.name(), origin:this});
+                                    this.emitter().emit("change", newData);
+                                }
+                            };
+                        }
+                        
+                        //get current attribute
+                        if (typeof(newValue) === "object" && newValue.on !== undefined && newValue.emitter !== undefined) {
+                            preValue = that[attr.name()](); //get the current value of the attribute
+                            if (preValue !== undefined)  {
+                                preValue.emitter().removeListener("change", lastListener);
+                            }
+                            lastListener = function (data) {
+                                attrChangeListeners[attr.name()].call(that, data);
+                            };
+                            newValue.emitter().on("change", lastListener);
+                        }
+                        that.emitter().emit("change", [{key:attr.name(), value:newValue, origin:that}]);
+                    });
+                };
+
+                //set up event handling for sub objects
+                for (i = 0; i < listProperties("attributes").length; ++i) {
+                    attr = attributes[listProperties("attributes")[i]];
+
+                    if (attr instanceof Attr) {
+                        setHandler.call(this, attr);
+                    }
+                }
+
 
                 if (pattern !== undefined) {
                     this.toString = pattern;
