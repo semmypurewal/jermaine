@@ -138,40 +138,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     if (!validator(newValue)) {
                         throw new Error(errorMessage);
                     } else {
-                        /*if ((obj instanceof EventEmitter || obj.on && obj.emitter().emit) && newValue.on) {
-                            //first, we remove the old listener if it exists
-                            if (attribute && attribute.emitter().listeners("change").length > 0 && typeof(listener) === "function") {
-                                attribute.emitter().removeListener("change", listener);
-                            }
-                            //then we create and add the new listener
-                            listener =  function (data) {
-                                for (i = 0; i < data.length && emit; ++i) {
-                                    if (data[i].origin === obj) {
-                                        emit = false;
-                                    }
-                                }
-
-                                if (emit && data.push) {
-                                    data.push({key:name, origin:obj});
-                                    obj.emitter().emit("change", data);
-                                }
-                            };
-                            if (newValue.on && newValue.emitter) {
-                                newValue.emitter().on("change", listener);
-                            }
-                        }*/
-
-
                         //call the set listener
                         listeners.set.call(obj, newValue);
 
                         //finally set the value
                         attribute = newValue;
-                        //emittedData.push({key:name, value:newValue, origin:obj});
-
-                        /*if ((obj instanceof EventEmitter || obj.on && obj.emitter().emit)) {
-                            obj.emitter().emit("change", emittedData);
-                        }*/
                     }
                     return obj;
                 } else {
