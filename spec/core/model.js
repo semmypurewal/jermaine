@@ -652,6 +652,13 @@ describe("Model", function () {
 
                 Person.hasA("name").which.isA("string");
                 Person.hasAn("id").which.isAn("integer");
+                Person.hasA("friend").which.validatesWith(function (friend) {
+                    return friend instanceof Person;
+                });
+
+                /*Person.hasMany("friends").eachOfWhich.validatesWith(function (friend) {
+                    return friend instanceof Person;
+                });*/
                 Person.hasA("dog").which.validatesWith(function (dog) {
                     return dog instanceof Dog;
                 });
@@ -664,14 +671,21 @@ describe("Model", function () {
 
             it("should return a JSON object that includes all attributes of the model", function () {
                 var p = new Person(),
+                    p2 = new Person(),
                     d = new Dog(),
                     pJSON,
                     dJSON;
 
-                p.name("Semmy").id(1234);
+
+                p2.name("Mark").id(5555);
+                p.name("Semmy").id(1234).friend(p2);
+                p2.friend(p);
                 d.name("Gracie").owner(p);
                 p.dog(d);
+                p2.dog(d);
 
+
+                console.log(p.toJSON());
                 pJSON = p.toJSON();
                 dJSON = d.toJSON();
                 expect(pJSON.name).not.toBe(undefined);

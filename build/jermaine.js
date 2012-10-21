@@ -578,6 +578,21 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     return arr.length;
                 };
 
+                actualList.toJSON = function (JSONreps) {
+                    var result = [], 
+                        i, j;
+
+                    /*for (i = 0; i < arr.length; ++i) {
+                        if (arr[i].toJSON) {
+                            result.push(arr[i].toJSON(JSONreps))
+                        } else {
+                            result.push(arr[i]);
+                        }
+                    }*/
+
+                    return result;
+                };
+
                 obj[name] = function () {
                     return actualList;
                 };
@@ -824,11 +839,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 }
 
                 this.toJSON = function (JSONreps) {
-                    var attributes = model.attributes(),
+                    var attributeList = model.attributes(),
                         attributeValue,
                         i, j,
                         thisJSONrep = null,
-                        attributeJSONrep = null;
+                        attributeJSONrep;
 
                     if (JSONreps === undefined) {
                         /* first call */
@@ -847,10 +862,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         }
                     }
 
-                    for (i = 0; i < attributes.length; ++i) {
+                    for (i = 0; i < attributeList.length; ++i) {
+                        attributeJSONrep = null;
                         /* get the attribute */
-                        attributeValue = this[attributes[i]]();
-
+                        attributeValue = this[attributeList[i]]();
+                        
                         /* find the current JSON representation for the attribute, if it exists */
                         for (j = 0; j < JSONreps.length; ++j) {
                             if (JSONreps[j].object === attributeValue) {
@@ -858,7 +874,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                             }
                         }
 
-                        if (attributeValue.toJSON !== undefined && attributeJSONrep === null) {
+                        if (attributeValue !== undefined && attributeValue.toJSON !== undefined && attributeJSONrep === null) {
                             /* create a new entry for the attribute */
                             attributeJSONrep = {};
                             JSONreps.push({object:attributeValue, JSONrep:attributeJSONrep});
@@ -873,9 +889,9 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
                         /* fill out the JSON representation for this object */
                         if(attributeJSONrep === null) {
-                            thisJSONrep[attributes[i]] = attributeValue;
+                            thisJSONrep[attributeList[i]] = attributeValue;
                         } else {
-                            thisJSONrep[attributes[i]] = attributeJSONrep;
+                            thisJSONrep[attributeList[i]] = attributeJSONrep;
                         }
                     }
                     return thisJSONrep;
