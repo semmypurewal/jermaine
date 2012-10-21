@@ -117,13 +117,13 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 throw new Error("Attr: addAttr method requires an object parameter");
             }
 
-            defaultValue = getDefaultValue();
+            /*defaultValue = getDefaultValue();
 
             if (defaultValue !== undefined && validator(defaultValue)) {
                 attribute = defaultValue;
             } else if (defaultValue !== undefined && !validator(defaultValue)) {
                 throw new Error("Attr: Default value of " + defaultValue + " does not pass validation for " + name);
-            }
+            }*/
 
             obj[name] = function (newValue) {
                 var preValue;
@@ -151,6 +151,15 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     return attribute;
                 }
             };
+
+            defaultValue = getDefaultValue();
+
+            if (defaultValue !== undefined && validator(defaultValue)) {
+                obj[name](defaultValue);
+            } else if (defaultValue !== undefined && !validator(defaultValue)) {
+                throw new Error("Attr: Default value of " + defaultValue + " does not pass validation for " + name);
+            }
+
         };
 
         //add a single validator object to the attribute

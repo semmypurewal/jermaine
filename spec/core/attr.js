@@ -599,5 +599,15 @@ describe("Attr", function () {
             expect(setSpy.callCount).toBe(3);
             expect(setSpy).toHaveBeenCalledWith("john", "mark");
         });
+
+        it("should call the appropriate listener when setting up a default value", function () {
+            name.defaultsTo("hello world!");
+            name.on("set", setSpy);
+            name.addTo(obj);
+
+            expect(setSpy).toHaveBeenCalled();
+            //expect(setSpy).toHaveBeenCalledWith("hello world!");
+            expect(setSpy).toHaveBeenCalledWith("hello world!", undefined);
+        });
     });
 });
