@@ -652,13 +652,7 @@ describe("Model", function () {
 
                 Person.hasA("name").which.isA("string");
                 Person.hasAn("id").which.isAn("integer");
-                Person.hasA("friend").which.validatesWith(function (friend) {
-                    return friend instanceof Person;
-                });
 
-                /*Person.hasMany("friends").eachOfWhich.validatesWith(function (friend) {
-                    return friend instanceof Person;
-                });*/
                 Person.hasA("dog").which.validatesWith(function (dog) {
                     return dog instanceof Dog;
                 });
@@ -670,12 +664,18 @@ describe("Model", function () {
             });
 
             it("should return a JSON object that includes all attributes of the model", function () {
-                var p = new Person(),
-                    p2 = new Person(),
+                var p,
+                    p2,
                     d = new Dog(),
                     pJSON,
                     dJSON;
 
+                Person.hasA("friend").which.validatesWith(function (friend) {
+                    return friend instanceof Person;
+                });
+
+                p = new Person();
+                p2 = new Person();
 
                 p2.name("Mark").id(5555);
                 p.name("Semmy").id(1234).friend(p2);
@@ -684,8 +684,6 @@ describe("Model", function () {
                 p.dog(d);
                 p2.dog(d);
 
-
-                console.log(p.toJSON());
                 pJSON = p.toJSON();
                 dJSON = d.toJSON();
                 expect(pJSON.name).not.toBe(undefined);
@@ -703,6 +701,43 @@ describe("Model", function () {
                 expect(dJSON.name).toBe("Gracie");
                 expect(dJSON.owner).not.toBe(undefined);
                 expect(dJSON.owner.name).toBe("Semmy");
+            });
+
+
+            it("should also work when the model instance has an attr_list", function () {
+                var p,
+                    p2,
+                    pJSON;
+                
+                Person.hasMany("friends").eachOfWhich.validatesWith(function (friend) {
+                    return friend instanceof Person;
+                });
+
+                Person.isBuiltWith("name", "id", "%dog", "%friends");
+                Dog.isBuiltWith("name", "%owner");
+
+                p = new Person("Semmy", 12345, new Dog("Gracie"), [new Person("Mark", 5555)]);
+
+                pJSON = p.toJSON();
+                expect(pJSON.name).toBe("Semmy");
+                expect(pJSON.id).toBe(12345);
+                expect(pJSON.dog.name).toBe("Gracie");
+                expect(pJSON.friends).toBeDefined();
+                expect(pJSON.friends.length).toBeDefined();
+                expect(pJSON.friends.length).toBe(1);
+
+                p2 = new Person("John", 7777, new Dog("Spot"));
+                p2.friends().add(p);
+                p.friends().add(p2);
+
+                expect(p2.toJSON().friends).toBeDefined();
+                expect(p2.toJSON().friends.length).toBeDefined();
+                expect(p2.toJSON().friends.length).toBe(1);
+                expect(p2.toJSON().friends[0].name).toBe("Semmy");
+
+                expect(p.toJSON().friends.length).toBe(2);
+                expect(p.toJSON().friends[1].name).toBe("John");
+                expect(p.toJSON().friends[1].dog.name).toBe("Spot");
             });
         });
     });
@@ -1475,6 +1510,7 @@ describe("Model", function () {
         }).toThrow("a card must be a valid Card object.");
 
         expect(d.cards().at(0).toJSON()).toEqual({rank:"2", suit:"clubs"});
+        expect(d.toJSON().cards.length).toBe(52);
     });
 
     it("should also work with this example", function () {

@@ -78,6 +78,27 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     return arr.length;
                 };
 
+                actualList.toJSON = function (JSONreps) {
+                    var result = [], 
+                        i, j;
+
+                    //check to make sure the current list is not in JSONreps
+                    for (i = 0;i < JSONreps.length; ++i) {
+                        if (JSONreps[i].object === this) {
+                            result = JSONreps[i].JSONrep;
+                        }
+                    }
+                    
+                    for (i = 0; i < arr.length; ++i) {
+                        if (arr[i].toJSON) {
+                            result.push(arr[i].toJSON(JSONreps))
+                        } else {
+                            result.push(arr[i]);
+                        }
+                    }
+                    return result;
+                };
+
                 obj[name] = function () {
                     return actualList;
                 };
