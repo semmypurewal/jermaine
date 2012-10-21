@@ -149,6 +149,9 @@ window.jermaine.util.namespace("window.jermaine.util", function (ns) {
             if (typeof(listener) !== "function") {
                 throw new Error("EventEmitter: second parameter must be a function to remove as an event listener");
             }
+            if (listeners[event] === undefined || listeners[event].length === 0) {
+                throw new Error("EventEmitter: there are no listeners registered for the '" + event + "' event");
+            }
 
             index = listeners[event].indexOf(listener);
 
