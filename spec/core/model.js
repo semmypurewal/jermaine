@@ -3,10 +3,10 @@
 describe("Model", function () {
     "use strict";
     var Model = window.jermaine.Model,
-    Attr = window.jermaine.Attr,
-    AttrList = window.jermaine.AttrList,
-    Method = window.jermaine.Method,
-    Person;
+        Attr = window.jermaine.Attr,
+        AttrList = window.jermaine.AttrList,
+        Method = window.jermaine.Method,
+        Person;
 
 
     beforeEach(function () {
@@ -637,6 +637,62 @@ describe("Model", function () {
         });
     });
 
+
+    describe("instance resulting from model", function () {
+        describe("toJSON method", function () {
+            var Dog;
+
+            beforeEach(function () {
+                Dog = new jermaine.Model(function () {
+                    this.hasA("name").which.isA("string");
+                    this.hasAn("owner").which.validatesWith(function (owner) {
+                        return owner instanceof Person;
+                    });
+                });
+
+                Person.hasA("name").which.isA("string");
+                Person.hasAn("id").which.isAn("integer");
+                Person.hasA("dog").which.validatesWith(function (dog) {
+                    return dog instanceof Dog;
+                });
+            });
+
+            it("should exist", function () {
+                var p = new Person();
+                expect(p.toJSON).not.toBeUndefined();
+            });
+
+            it("should return a JSON object that includes all attributes of the model", function () {
+                var p = new Person(),
+                    d = new Dog(),
+                    pJSON,
+                    dJSON;
+
+                p.name("Semmy").id(1234);
+                d.name("Gracie").owner(p);
+                p.dog(d);
+
+                pJSON = p.toJSON();
+                dJSON = d.toJSON();
+                expect(pJSON.name).not.toBe(undefined);
+
+                expect(pJSON.name).toBe("Semmy");
+                expect(pJSON.id).toBe(1234);
+                expect(pJSON.dog).not.toBeUndefined();
+                expect(pJSON.dog.name).toBe("Gracie");
+                expect(pJSON.dog.owner).not.toBe(undefined);
+                expect(pJSON.dog.owner.name).toBe("Semmy");
+                expect(pJSON.dog.owner.dog).not.toBeUndefined();
+                expect(pJSON.dog.owner.dog.name).toBe("Gracie");
+
+                expect(dJSON.name).not.toBe(undefined);
+                expect(dJSON.name).toBe("Gracie");
+                expect(dJSON.owner).not.toBe(undefined);
+                expect(dJSON.owner.name).toBe("Semmy");
+            });
+        });
+    });
+
     describe("EventEmitter functionality", function () {
         var p,
             spy1,
@@ -931,6 +987,8 @@ describe("Model", function () {
                 p.name("semmy");                
             });
         });
+
+
     });
 
     describe("isBuiltWith method", function () {
@@ -1401,6 +1459,8 @@ describe("Model", function () {
         expect(function () {
             d.cards().add(5);
         }).toThrow("a card must be a valid Card object.");
+
+        expect(d.cards().at(0).toJSON()).toEqual({rank:"2", suit:"clubs"});
     });
 
     it("should also work with this example", function () {

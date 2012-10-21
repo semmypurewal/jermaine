@@ -208,6 +208,65 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     }
                 }
 
+                this.toJSON = function (JSONreps) {
+                    var attributes = model.attributes(),
+                        attributeValue,
+                        i, j,
+                        thisJSONrep = null,
+                        attributeJSONrep = null;
+
+                    if (JSONreps === undefined) {
+                        /* first call */
+                        thisJSONrep = {};
+                        JSONreps = [];
+                        JSONreps.push({object:this, JSONrep:thisJSONrep});
+                    } else if (typeof(JSONreps) !== "object") {
+                        /* error condition */
+                        throw new Error("Instance: toJSON should not take a parameter (unless called recursively)");
+                    } else {
+                        /* find the current JSON representation of this object, if it exists */
+                        for (i = 0; i < JSONreps.length; ++i) {
+                            if (JSONreps[i].object === this) {
+                                thisJSONrep = JSONreps[i].JSONrep;
+                            }
+                        }
+                    }
+
+                    for (i = 0; i < attributes.length; ++i) {
+                        /* get the attribute */
+                        attributeValue = this[attributes[i]]();
+
+                        /* find the current JSON representation for the attribute, if it exists */
+                        for (j = 0; j < JSONreps.length; ++j) {
+                            if (JSONreps[j].object === attributeValue) {
+                                attributeJSONrep = JSONreps[j].JSONrep;
+                            }
+                        }
+
+                        if (attributeValue.toJSON !== undefined && attributeJSONrep === null) {
+                            /* create a new entry for the attribute */
+                            attributeJSONrep = {};
+                            JSONreps.push({object:attributeValue, JSONrep:attributeJSONrep});
+                            JSONreps[JSONreps.length-1].JSONrep = attributeValue.toJSON(JSONreps);
+
+                            /* this works */
+                            /*attributeJSONrep = {object:attributeValue, JSONrep:attributeJSONrep};
+                            JSONreps.push({object:attributeValue, JSONrep:attributeJSONrep});
+                            attributeJSONrep.JSONrep = attributeValue.toJSON(JSONreps);
+                            attributeJSONrep = attributeJSONrep.JSONrep;*/
+                        }
+
+                        /* fill out the JSON representation for this object */
+                        if(attributeJSONrep === null) {
+                            thisJSONrep[attributes[i]] = attributeValue;
+                        } else {
+                            thisJSONrep[attributes[i]] = attributeJSONrep;
+                        }
+                    }
+                    return thisJSONrep;
+                    
+                };
+
 
                 if (pattern !== undefined) {
                     this.toString = pattern;
