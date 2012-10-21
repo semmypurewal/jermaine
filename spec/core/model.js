@@ -643,7 +643,7 @@ describe("Model", function () {
             var Dog;
 
             beforeEach(function () {
-                Dog = new jermaine.Model(function () {
+                Dog = new Model(function () {
                     this.hasA("name").which.isA("string");
                     this.hasAn("owner").which.validatesWith(function (owner) {
                         return owner instanceof Person;
