@@ -582,14 +582,20 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     var result = [], 
                         i, j;
 
-                    /*for (i = 0; i < arr.length; ++i) {
+                    //check to make sure the current list is not in JSONreps
+                    for (i = 0;i < JSONreps.length; ++i) {
+                        if (JSONreps[i].object === this) {
+                            result = JSONreps[i].JSONrep;
+                        }
+                    }
+                    
+                    for (i = 0; i < arr.length; ++i) {
                         if (arr[i].toJSON) {
-                            result.push(arr[i].toJSON(JSONreps))
+                            result.push(arr[i].toJSON(JSONreps));
                         } else {
                             result.push(arr[i]);
                         }
-                    }*/
-
+                    }
                     return result;
                 };
 
@@ -842,12 +848,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     var attributeList = model.attributes(),
                         attributeValue,
                         i, j,
-                        thisJSONrep = null,
+                        thisJSONrep = {},
                         attributeJSONrep;
 
                     if (JSONreps === undefined) {
                         /* first call */
-                        thisJSONrep = {};
                         JSONreps = [];
                         JSONreps.push({object:this, JSONrep:thisJSONrep});
                     } else if (typeof(JSONreps) !== "object") {
@@ -876,7 +881,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
                         if (attributeValue !== undefined && attributeValue.toJSON !== undefined && attributeJSONrep === null) {
                             /* create a new entry for the attribute */
-                            attributeJSONrep = {};
+                            attributeJSONrep = (attributes[attributeList[i]] instanceof AttrList)?[]:{};
                             JSONreps.push({object:attributeValue, JSONrep:attributeJSONrep});
                             JSONreps[JSONreps.length-1].JSONrep = attributeValue.toJSON(JSONreps);
 
@@ -891,6 +896,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         if(attributeJSONrep === null) {
                             thisJSONrep[attributeList[i]] = attributeValue;
                         } else {
+                            //console.log("adding " + attributeList[i] + " json rep for " + thisJSONrep.name);
+                            //console.log(attributeJSONrep);
                             thisJSONrep[attributeList[i]] = attributeJSONrep;
                         }
                     }
