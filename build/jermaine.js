@@ -822,8 +822,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         }
                         
                         //get current attribute
-                        if (typeof(newValue) === "object" && newValue.on !== undefined && newValue.emitter !== undefined) {
-                            if (preValue !== undefined)  {
+                        if (newValue !== null && typeof(newValue) === "object" && newValue.on !== undefined && newValue.emitter !== undefined) {
+                            if (preValue !== undefined && preValue !== null)  {
                                 preValue.emitter().removeListener("change", lastListener);
                             }
                             lastListener = function (data) {

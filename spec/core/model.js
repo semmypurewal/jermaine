@@ -1027,6 +1027,49 @@ describe("Model", function () {
             expect(spy.callCount).toBe(6);
         });
 
+
+        it("should allow changes to and from null value without causing an error", function () {
+            var p,
+                Dog,
+                d;
+
+            Dog = new Model(function () {
+                this.hasA("name").which.isA("string");
+                this.isBuiltWith("name");
+            });
+
+            Person = new Model(function () {
+                this.hasA("name").which.isA("string");
+                this.hasA("dog").which.validatesWith(function (dog) {
+                    return (dog instanceof Dog || dog === null);
+                });
+                this.isBuiltWith("name");
+            });
+
+            p = new Person("Semmy");
+            expect(p.dog()).toBeUndefined();
+            p.dog(null);
+           
+            p.on("change", function (data) {
+                
+            });
+
+            expect(p.dog()).toBeNull();
+            p.dog(new Dog("Gracie"));
+
+            expect(function () {
+                p.dog(new Dog("Gracie"));
+            }).not.toThrow();
+
+            expect(p.dog().name()).toBe("Gracie");
+
+            expect(function () {
+                p.dog(null);
+            }).not.toThrow();
+            
+            expect(p.dog()).toBe(null);
+        });
+        
         describe("on method", function () {
             it("should reference 'this' as the current object, and not the underlying event emitter", function () {
                 var p = new Person();
