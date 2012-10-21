@@ -102,6 +102,12 @@ describe("event emitter", function () {
             }).toThrow("EventEmitter: second parameter must be a function to remove as an event listener");
         });
 
+        it("should throw an error if there are no listeners for that particular event", function () {
+            expect(function () {
+                e.removeListener("whatever", function () {});
+            }).toThrow("EventEmitter: there are no listeners registered for the 'whatever' event");
+        });
+
         it("should remove the listener from the event", function () {
             e.on("event", listener1);
             e.on("event", listener2);
