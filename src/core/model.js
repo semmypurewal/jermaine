@@ -151,10 +151,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 };
                 //this.on = this.emitter().on;
 
-                //add attributes
-                addProperties(this, "attributes");
-                addProperties(this, "methods");
-
                 var attr,
                     attrChangeListeners = {},
                     setHandler,
@@ -269,6 +265,9 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     
                 };
 
+                //add attributes
+                addProperties(this, "attributes");
+                addProperties(this, "methods");
 
                 if (pattern !== undefined) {
                     this.toString = pattern;

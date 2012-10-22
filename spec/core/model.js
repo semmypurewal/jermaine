@@ -1133,6 +1133,7 @@ describe("Model", function () {
 
     });
 
+
     describe("looksLike method", function () {
         xit("should be way more interesting than it currently is", function () {
 
@@ -1493,8 +1494,26 @@ describe("Model", function () {
             /*jshint newcap:false */
             p = Person();
         }).toThrow("Model: instances must be created using the new operator");
+    });
 
-        
+    it("should not throw an error when a model has a submodel defined in defaultsTo that changes", function () {
+        var Dog, p;
+
+        Dog = new Model(function () {
+            this.hasA("name").which.isA("string");
+            this.isBuiltWith("name");
+        });
+
+        Person.hasA("dog").which.defaultsTo(function () {
+            return new Dog("Loki");
+        });
+
+        p = new Person();
+        expect(p.dog().name()).toBe("Loki");
+
+        expect(function () {
+            p.dog(new Dog("Gracie"));
+        }).not.toThrow();
     });
 
     it("should work with this example", function () {
