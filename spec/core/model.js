@@ -1317,6 +1317,23 @@ describe("Model", function () {
             }).not.toThrow(new Error("Constructor requires firstName, lastName to be specified"));
         });
 
+        it("should throw an error if the constructor is called with more arguments than isBuiltWith specifies", function () {
+            
+            var Person,
+                p;
+            Person = new Model(function () {
+                this.hasA("name").which.isA("string");
+                this.hasMany("friends").eachOfWhich.validateWith(function (friend) {
+                    return friend instanceof Person;
+                });
+            });
+
+            expect(function () {
+                p = new Person("Semmy");
+            }).toThrow("Too many arguments to constructor. Expected 0 required arguments and 0 optional arguments");
+
+    });
+
         it("should set the attributes associated with the attributes to the appropriate values", function () {
             var Card,
             Thing,
@@ -1532,6 +1549,8 @@ describe("Model", function () {
             p.dog(new Dog("Gracie"));
         }).not.toThrow();
     });
+
+
 
     it("should work with this example", function () {
         var Card,

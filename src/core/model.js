@@ -291,7 +291,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         }
                         err += " to be specified";
                         throw new Error(err);
-                    } else {
+                    } if (arguments.length > requiredConstructorArgs.length + optionalConstructorArgs.length) {
+                        throw new Error("Too many arguments to constructor. Expected " + requiredConstructorArgs.length + " required arguments and " +
+                                        optionalConstructorArgs.length + " optional arguments");
+                    }
+                    else {
                         for (i = 0; i < arguments.length; ++i) {
                             attribute = i < requiredConstructorArgs.length?
                                 requiredConstructorArgs[i]:
