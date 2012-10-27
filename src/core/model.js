@@ -246,25 +246,17 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                             }
                         }
 
-                        if (attributeValue !== undefined && attributeValue.toJSON !== undefined && attributeJSONrep === null) {
+                        if (attributeValue !== undefined && attributeValue !== null && attributeValue.toJSON !== undefined && attributeJSONrep === null) {
                             /* create a new entry for the attribute */
                             attributeJSONrep = (attributes[attributeList[i]] instanceof AttrList)?[]:{};
                             JSONreps.push({object:attributeValue, JSONrep:attributeJSONrep});
                             JSONreps[JSONreps.length-1].JSONrep = attributeValue.toJSON(JSONreps);
-
-                            /* this works */
-                            /*attributeJSONrep = {object:attributeValue, JSONrep:attributeJSONrep};
-                            JSONreps.push({object:attributeValue, JSONrep:attributeJSONrep});
-                            attributeJSONrep.JSONrep = attributeValue.toJSON(JSONreps);
-                            attributeJSONrep = attributeJSONrep.JSONrep;*/
                         }
 
                         /* fill out the JSON representation for this object */
                         if(attributeJSONrep === null) {
                             thisJSONrep[attributeList[i]] = attributeValue;
                         } else {
-                            //console.log("adding " + attributeList[i] + " json rep for " + thisJSONrep.name);
-                            //console.log(attributeJSONrep);
                             thisJSONrep[attributeList[i]] = attributeJSONrep;
                         }
                     }

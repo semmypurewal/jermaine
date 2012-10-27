@@ -739,6 +739,22 @@ describe("Model", function () {
                 expect(p.toJSON().friends[1].name).toBe("John");
                 expect(p.toJSON().friends[1].dog.name).toBe("Spot");
             });
+
+            it("should not throw an error when called on a null value", function () {
+                var p, pJSON;
+
+                Person.hasA("nullValue");
+
+                p = new Person();
+                p.nullValue(null);
+
+                expect(function () {
+                    pJSON = p.toJSON();
+                }).not.toThrow();
+
+                expect(pJSON).not.toBeUndefined();
+                expect(pJSON.nullValue).toBeNull();
+            });
         });
     });
 
