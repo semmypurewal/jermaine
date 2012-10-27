@@ -1031,7 +1031,7 @@ describe("Model", function () {
         it("should allow changes to and from null value without causing an error", function () {
             var p,
                 Dog,
-                d;
+                d1, d2;
 
             Dog = new Model(function () {
                 this.hasA("name").which.isA("string");
@@ -1046,30 +1046,47 @@ describe("Model", function () {
                 this.isBuiltWith("name");
             });
 
+
+            d1 = new Dog("Gracie");
+            d2 = new Dog("Loki");
+
+            expect(d1.emitter().listeners("change").length).toBe(0);
+            expect(d2.emitter().listeners("change").length).toBe(0);
+
             p = new Person("Semmy");
             expect(p.dog()).toBeUndefined();
             p.dog(null);
            
-            p.on("change", function (data) {
-                
-            });
-
             expect(p.dog()).toBeNull();
-            p.dog(new Dog("Gracie"));
+
+            expect(d1.emitter().listeners("change").length).toBe(0);
+            expect(d2.emitter().listeners("change").length).toBe(0);
 
             expect(function () {
-                p.dog(new Dog("Gracie"));
+                p.dog(d1);
             }).not.toThrow();
 
             expect(p.dog().name()).toBe("Gracie");
+            expect(d1.emitter().listeners("change").length).toBe(1);
+            expect(d2.emitter().listeners("change").length).toBe(0);
 
             expect(function () {
                 p.dog(null);
             }).not.toThrow();
+
+            expect(d1.emitter().listeners("change").length).toBe(0);
+            expect(d2.emitter().listeners("change").length).toBe(0);
             
             expect(p.dog()).toBe(null);
+
+            p.dog(d2);
+
+            expect(p.dog().name()).toBe("Loki");
+            expect(d1.emitter().listeners("change").length).toBe(0);
+            expect(d2.emitter().listeners("change").length).toBe(1);
         });
-        
+
+
         describe("on method", function () {
             it("should reference 'this' as the current object, and not the underlying event emitter", function () {
                 var p = new Person();

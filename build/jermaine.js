@@ -829,9 +829,16 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                             };
                         }
                         
+                        if (lastListener !== undefined) {
+                            if (preValue !== undefined && preValue !== null && preValue.emitter !== undefined) {
+                                preValue.emitter().removeListener("change", lastListener);
+                                lastListener = undefined;
+                            }
+                        }
+
                         //get current attribute
                         if (newValue !== null && typeof(newValue) === "object" && newValue.on !== undefined && newValue.emitter !== undefined) {
-                            if (preValue !== undefined && preValue !== null)  {
+                            if (preValue !== undefined && preValue !== null && lastListener !== undefined) {
                                 preValue.emitter().removeListener("change", lastListener);
                             }
                             lastListener = function (data) {
