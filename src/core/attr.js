@@ -263,7 +263,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
          *
          * @param {obj} the object to which this attribute will be attached
          */
-
         this.addTo = function (obj) {
             var attribute,
                 listener,
