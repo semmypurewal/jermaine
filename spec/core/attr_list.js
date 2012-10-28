@@ -240,6 +240,26 @@ describe("AttrList", function () {
         });
     });
 
+    describe("toJSON method", function () {
+        it("should return a JSON representation of the elements in the list", function () {
+            var testObj = ["john", "semmy", "mark", "jim"];
+
+            obj.friends().add("john");
+            obj.friends().add("semmy");
+            obj.friends().add("mark");
+            obj.friends().add("jim");
+            expect(obj.friends()).toBeDefined();
+
+            expect(function () {
+                obj.friends().toJSON();
+            }).not.toThrow();
+
+            expect(obj.friends().toJSON()).toEqual(testObj);
+
+            
+        });
+    });
+
     describe("pop method", function () {
         it("should return the object which was popped", function () {
             var lastObj = "mark",
