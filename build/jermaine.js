@@ -595,9 +595,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         i, j;
 
                     //check to make sure the current list is not in JSONreps
-                    for (i = 0;i < JSONreps.length; ++i) {
-                        if (JSONreps[i].object === this) {
-                            result = JSONreps[i].JSONrep;
+                    if (JSONreps !== undefined) {
+                        for (i = 0;i < JSONreps.length; ++i) {
+                            if (JSONreps[i].object === this) {
+                                result = JSONreps[i].JSONrep;
+                            }
                         }
                     }
                     
