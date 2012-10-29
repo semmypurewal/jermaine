@@ -1,13 +1,8 @@
 window.jermaine.util.namespace("window.jermaine", function (ns) {
     "use strict";
 
-    var Constructor = function (model) {
-
-    };
-
     var Model = function (specification) {
-        var that = this,
-            methods = {},
+        var methods = {},
             attributes = {},
             pattern,
             modified = true,
@@ -20,7 +15,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             EventEmitter = ns.util.EventEmitter,
             property,
             listProperties,
-            create,
+            updateConstructor,
             isImmutable,
             initializer = function () {},
             constructor = function () {},
@@ -28,7 +23,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 if (modified) {
                     //validate the model if it has been modified
                     model.validate();
-                    create();
+                    updateConstructor();
                 }
                 return constructor.apply(this, arguments);
             };
@@ -104,13 +99,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             return list;
         };
 
-        /* private function that creates the constructor */
-        create = function (name) {
-            var i, j,
-                err;
-            
+        /* private function that updates the constructor */
+        updateConstructor = function () {
             constructor = function () {
-                var i,
+                var i, j,
+                    err,
                     attribute,
                     attributeList = model.attributes(), 
                     methodList = model.methods(), 
@@ -276,11 +269,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     if (i < attributeList.length) {
                         //if the object is immutable, all attributes should be immutable
                         if (isImmutable) {
-                            attributes[attributeList[i]].isImmutable();
+                            model.attribute(attributeList[i]).isImmutable();
                         }
-                        attributes[attributeList[i]].addTo(this);
+                        model.attribute(attributeList[i]).addTo(this);
                     } else {
-                        methods[methodList[i-attributeList.length]].addTo(this);
+                        model.method(methodList[i-attributeList.length]).addTo(this);
                     }
                 }
 
@@ -326,7 +319,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 // finally, call the initializer
                 initializer.call(this);
             };
-            return constructor;
         };
         /*********** END PRIVATE METHODS **************/
 
@@ -468,8 +460,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         
         model.validate = function () {
             var i,
-            attributes = this.attributes(),
-            methods = this.methods();
+                attributes = this.attributes(),
+                methods = this.methods();
 
             //check to make sure that isBuiltWith has actual attributes
             for (i = 0; i < requiredConstructorArgs.length; ++i) {
@@ -508,8 +500,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             modified = false;
         };
         /************** END PUBLIC API ****************/
-
-
         
         //here we are returning our model object
         //which is a function with a bunch of methods that
