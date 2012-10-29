@@ -1,12 +1,15 @@
 window.jermaine.util.namespace("window.jermaine", function (ns) {
     "use strict";
-    function Model(specification) {
+
+    var Constructor = function (model) {
+
+    };
+
+    var Model = function (specification) {
         var that = this,
             methods = {},
             attributes = {},
             pattern,
-            getObserver,
-            setObserver,
             modified = true,
             requiredConstructorArgs = [],
             optionalConstructorArgs = [],
@@ -23,14 +26,13 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             constructor = function () {},
             model = function () {
                 if (modified) {
+                    //validate the model if it has been modified
+                    model.validate();
                     create();
                 }
                 return constructor.apply(this, arguments);
             };
 
-
-        //make instances of models instances of eventemitters
-        //model.prototype = new EventEmitter();
 
         //temporary fix so API stays the same
         if (arguments.length > 1) {
@@ -104,57 +106,116 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
         /* private function that creates the constructor */
         create = function (name) {
-            var that = this,
-                i, j,
+            var i, j,
                 err;
-
-            //validate the model first
-            model.validate();
-
+            
             constructor = function () {
-                var that = this,
-                    i,
+                var i,
                     attribute,
-                    emitter,
+                    attributeList = model.attributes(), 
+                    methodList = model.methods(), 
+                    emitter = new EventEmitter(),
+                    attr,
+                    attrChangeListeners = {},
+                    setHandler,
+                    lastListener,
                     addProperties;
 
                 if (!(this instanceof model)) {
                     throw new Error("Model: instances must be created using the new operator");
                 }
 
-                //utility function that adds methods and attributes
-                addProperties = function (obj, type) {
-                    var properties = type==="attributes" ? attributes : methods,
-                    i;
-                    for (i in properties) {
-                        if (properties.hasOwnProperty(i)) {
-                            //if the object is immutable, all attributes should be immutable
-                            if(properties === attributes && isImmutable) {
-                                properties[i].isImmutable();
-                            }
-                            properties[i].addTo(obj);
-                        }
-                    }
-                };
 
-                emitter = new EventEmitter();
+                ////////////////////////////////////////////////////////////////
+                ////////////// PUBLIC API FOR ALL INSTANCES ////////////////////
+                ////////////////////////////////////////////////////////////////
 
+                /**
+                 * Returns the EventEmitter associated with this instance.
+                 *
+                 */
                 this.emitter = function () {
                     return emitter;
                 };
 
-                //expose the the on method
-                this.on = function (event, listener) {
-                    that.emitter().on(event, function (data) {
-                        listener.call(that, data);
-                    });
-                };
-                //this.on = this.emitter().on;
+                /**
+                 * Registers a listener for this instance's changes.
+                 *
+                 */
+                this.on = this.emitter().on;
 
-                var attr,
-                    attrChangeListeners = {},
-                    setHandler,
-                    lastListener;
+                /**
+                 * Emits an event
+                 */
+                this.emit = this.emitter().emit;
+
+                /**
+                 * Returns a JSON representation of this instance.
+                 *
+                 */
+                this.toJSON = function (JSONreps) {
+                    var attributeValue,
+                        i, j,
+                        thisJSONrep = {},
+                        attributeJSONrep;
+
+                    if (JSONreps === undefined) {
+                        // first call
+                        JSONreps = [];
+                        JSONreps.push({object:this, JSONrep:thisJSONrep});
+                    } else if (typeof(JSONreps) !== "object") {
+                        // error condition 
+                        throw new Error("Instance: toJSON should not take a parameter (unless called recursively)");
+                    } else {
+                        // find the current JSON representation of this object, if it exists
+                        for (i = 0; i < JSONreps.length; ++i) {
+                            if (JSONreps[i].object === this) {
+                                thisJSONrep = JSONreps[i].JSONrep;
+                            }
+                        }
+                    }
+
+                    for (i = 0; i < attributeList.length; ++i) {
+                        attributeJSONrep = null;
+                        // get the attribute
+                        attributeValue = this[attributeList[i]]();
+                        
+                        // find the current JSON representation for the attribute, if it exists
+                        for (j = 0; j < JSONreps.length; ++j) {
+                            if (JSONreps[j].object === attributeValue) {
+                                attributeJSONrep = JSONreps[j].JSONrep;
+                            }
+                        }
+
+                        if (attributeValue !== undefined && attributeValue !== null && attributeValue.toJSON !== undefined && attributeJSONrep === null) {
+                            // create a new entry for the attribute
+                            attributeJSONrep = (attributes[attributeList[i]] instanceof AttrList)?[]:{};
+                            JSONreps.push({object:attributeValue, JSONrep:attributeJSONrep});
+                            JSONreps[JSONreps.length-1].JSONrep = attributeValue.toJSON(JSONreps);
+                        }
+
+                        // fill out the JSON representation for this object
+                        if(attributeJSONrep === null) {
+                            thisJSONrep[attributeList[i]] = attributeValue;
+                        } else {
+                            thisJSONrep[attributeList[i]] = attributeJSONrep;
+                        }
+                    }
+                    return thisJSONrep;
+                };
+
+                /**
+                 * Returns a String representation of this instance
+                 *
+                 */
+                this.toString = (pattern !== undefined)?pattern:function () {
+                    return "Jermaine Model Instance";
+                };
+
+                ////////////////////////////////////////////////////////////////
+                ////////////// END PUBLIC API FOR ALL INSTANCES ////////////////
+                ////////////////////////////////////////////////////////////////
+
 
                 setHandler = function (attr) {
                     //when set handler is called, this should be the current object
@@ -174,9 +235,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                                 }
 
                                 if (emit) {
-                                    //maybe we should manipulate the data directly? copy it and emit a new data object?
                                     newData.push({key:attr.name(), origin:this});
-                                    this.emitter().emit("change", newData);
+                                    this.emit("change", newData);
                                 }
                             };
                         }
@@ -188,7 +248,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                             }
                         }
 
-                        //get current attribute
                         if (newValue !== null && typeof(newValue) === "object" && newValue.on !== undefined && newValue.emitter !== undefined) {
                             if (preValue !== undefined && preValue !== null && lastListener !== undefined) {
                                 preValue.emitter().removeListener("change", lastListener);
@@ -198,81 +257,34 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                             };
                             newValue.emitter().on("change", lastListener);
                         }
-                        that.emitter().emit("change", [{key:attr.name(), value:newValue, origin:that}]);
+                        this.emit("change", [{key:attr.name(), value:newValue, origin:this}]);
                     });
                 };
 
                 //set up event handling for sub objects
-                for (i = 0; i < listProperties("attributes").length; ++i) {
-                    attr = attributes[listProperties("attributes")[i]];
+                for (i = 0; i < attributeList.length;  ++i) {
+                    attr = model.attribute(attributeList[i]);
 
                     if (attr instanceof Attr) {
                         setHandler.call(this, attr);
                     }
                 }
 
-                this.toJSON = function (JSONreps) {
-                    var attributeList = model.attributes(),
-                        attributeValue,
-                        i, j,
-                        thisJSONrep = {},
-                        attributeJSONrep;
 
-                    if (JSONreps === undefined) {
-                        /* first call */
-                        JSONreps = [];
-                        JSONreps.push({object:this, JSONrep:thisJSONrep});
-                    } else if (typeof(JSONreps) !== "object") {
-                        /* error condition */
-                        throw new Error("Instance: toJSON should not take a parameter (unless called recursively)");
+                // add all of the attributes and the methods to the object
+                for (i = 0; i < attributeList.length + methodList.length; ++i)  {
+                    if (i < attributeList.length) {
+                        //if the object is immutable, all attributes should be immutable
+                        if (isImmutable) {
+                            attributes[attributeList[i]].isImmutable();
+                        }
+                        attributes[attributeList[i]].addTo(this);
                     } else {
-                        /* find the current JSON representation of this object, if it exists */
-                        for (i = 0; i < JSONreps.length; ++i) {
-                            if (JSONreps[i].object === this) {
-                                thisJSONrep = JSONreps[i].JSONrep;
-                            }
-                        }
+                        methods[methodList[i-attributeList.length]].addTo(this);
                     }
-
-                    for (i = 0; i < attributeList.length; ++i) {
-                        attributeJSONrep = null;
-                        /* get the attribute */
-                        attributeValue = this[attributeList[i]]();
-                        
-                        /* find the current JSON representation for the attribute, if it exists */
-                        for (j = 0; j < JSONreps.length; ++j) {
-                            if (JSONreps[j].object === attributeValue) {
-                                attributeJSONrep = JSONreps[j].JSONrep;
-                            }
-                        }
-
-                        if (attributeValue !== undefined && attributeValue !== null && attributeValue.toJSON !== undefined && attributeJSONrep === null) {
-                            /* create a new entry for the attribute */
-                            attributeJSONrep = (attributes[attributeList[i]] instanceof AttrList)?[]:{};
-                            JSONreps.push({object:attributeValue, JSONrep:attributeJSONrep});
-                            JSONreps[JSONreps.length-1].JSONrep = attributeValue.toJSON(JSONreps);
-                        }
-
-                        /* fill out the JSON representation for this object */
-                        if(attributeJSONrep === null) {
-                            thisJSONrep[attributeList[i]] = attributeValue;
-                        } else {
-                            thisJSONrep[attributeList[i]] = attributeJSONrep;
-                        }
-                    }
-                    return thisJSONrep;
-                    
-                };
-
-                //add attributes
-                addProperties(this, "attributes");
-                addProperties(this, "methods");
-
-                if (pattern !== undefined) {
-                    this.toString = pattern;
                 }
 
-                //use constructor args to build object
+                // build the object using the constructor arguments
                 if(arguments.length > 0) {
                     if (arguments.length < requiredConstructorArgs.length) {
                         //construct and throw error
@@ -293,7 +305,6 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                                 requiredConstructorArgs[i]:
                                 optionalConstructorArgs[i-requiredConstructorArgs.length];
 
-
                             if (model.attribute(attribute) instanceof AttrList) {
                                 //make sure that arguments[i] is an array
                                 if (Object.prototype.toString.call(arguments[i]) !== "[object Array]") {
@@ -311,6 +322,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                         }
                     }
                 }
+
+                // finally, call the initializer
                 initializer.call(this);
             };
             return constructor;
@@ -502,7 +515,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         //which is a function with a bunch of methods that
         //manipulate how the function behaves
         return model;
-    }
+    };
 
     ns.Model = Model;
 });

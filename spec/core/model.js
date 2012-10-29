@@ -1104,6 +1104,14 @@ describe("Model", function () {
 
 
         describe("on method", function () {
+            //this functionality is temporarily deprecated unless it is needed.
+            //if it is, the current function can be replaced with this:
+            /*var that = this;
+              this.on = function (event, listener) {
+                  that.emitter().on(event, function (data) {
+                      listener.call(that, data);
+                  });
+              };*/
             it("should reference 'this' as the current object, and not the underlying event emitter", function () {
                 var p = new Person();
                 p.on("change", function () {
