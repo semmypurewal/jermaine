@@ -818,7 +818,8 @@ describe("Model", function () {
             expect(spy1).toHaveBeenCalledWith([{key:"name", value:"Grace", origin:d}, {key:"dog", origin:p}]);
         });
 
-        it("should call an event emitter only when the instance of the model changes, not when an instance of another model changes", function () {
+        it("should call an event emitter only when the instance of the model changes, not when an instance of another" +
+           " model changes", function () {
             var p1, p2;
             p1 = new Person();
             p2 = new Person();
@@ -947,7 +948,7 @@ describe("Model", function () {
             expect(spyp1).toHaveBeenCalledWith([{key:"dog", value:d1, origin:p1}]);
             expect(spyp1).toHaveBeenCalledWith([{key:"owner", value:p1, origin:d1}, {key:"dog", origin:p1}]);
 
-            expect(spyp2.callCount).toBe(3); //not true -- should be notified that p1's dog has changed, and that p1's dog's owner has changed
+            expect(spyp2.callCount).toBe(3);
             expect(spyp2).toHaveBeenCalledWith([{key:"dog", value:d1, origin:p1}, {key:"friend", origin:p2}]);
             expect(spyp2).toHaveBeenCalledWith([{key:"owner", value:p1, origin:d1}, {key:"dog", origin:p1}, {key:"friend", origin:p2}]);
 
@@ -962,7 +963,8 @@ describe("Model", function () {
             //as a result of p2's dog changing
             expect(spyp2).toHaveBeenCalledWith([{key:"dog", value:d2, origin:p2}]);
             expect(spyp1).toHaveBeenCalledWith([{key:"dog", value:d2, origin:p2}, {key:"friend", origin:p1}]);
-            expect(spyd1).toHaveBeenCalledWith([{key:"dog", value:d2, origin:p2}, {key:"friend", origin:p1}, {key:"owner", origin:d1}]);
+            expect(spyd1).toHaveBeenCalledWith([{key:"dog", value:d2, origin:p2}, {key:"friend", origin:p1},
+                                                {key:"owner", origin:d1}]);
 
             //as a result of d2's owner changing
             expect(spyd2.callCount).toBe(1);
@@ -971,7 +973,8 @@ describe("Model", function () {
            
 
             expect(spyp1.callCount).toBe(6);
-            expect(spyp1).toHaveBeenCalledWith([{key:"owner", value:p2, origin:d2},{key:"dog", origin:p2}, {key:"friend", origin:p1}]);
+            expect(spyp1).toHaveBeenCalledWith([{key:"owner", value:p2, origin:d2},{key:"dog", origin:p2},
+                                                {key:"friend", origin:p1}]);
             expect(spyp1).toHaveBeenCalledWith([{key:"dog", value:d2, origin:p2}, {key:"friend", origin:p1}]);
         });
 
@@ -1128,17 +1131,21 @@ describe("Model", function () {
         it("should take any number of string parameters", function () {
             expect(function () {
                 Person.isBuiltWith("larry", "moe", 3.4);
-            }).toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the optional final parameter"));
+            }).toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the optional " +
+                                 "final parameter"));
             expect(function () {
                 Person.isBuiltWith("larry", 3.4, "moe", "curly");
-            }).toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the optional final parameter"));
+            }).toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the optional " +
+                                 "final parameter"));
             expect(function () {
                 Person.isBuiltWith("larry", "moe", "curly", "semmy", "john");
-            }).not.toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the optional final parameter"));
+            }).not.toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the " +
+                                     "optional final parameter"));
             //s = new Model();
             expect(function () {
                 Person.isBuiltWith("larry", "curly", "moe", "semmy", "john", "mark", "anotherMark");
-            }).not.toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the optional final parameter"));
+            }).not.toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the " +
+                                     "optional final parameter"));
         });
 
 
@@ -1150,25 +1157,31 @@ describe("Model", function () {
             };
             expect(function () {
                 Person.isBuiltWith("larry", "moe", f, g);
-            }).toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the optional final parameter"));
+            }).toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the optional " +
+                                 "final parameter"));
             expect(function () {
                 Person.isBuiltWith("larry", "moe", g, "curly", "semmy", "john");
-            }).toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the optional final parameter"));
+            }).toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the optional " + 
+                                 "final parameter"));
             expect(function () {
                 Person.isBuiltWith("larry", f);
-            }).not.toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the optional final parameter"));
+            }).not.toThrow(new Error("Model: isBuiltWith parameters must be strings except for a function as the " + 
+                                     "optional final parameter"));
         });
 
         it("should accept strings preceded with a % as the final parameters before the optional function", function () {
             expect(function () {
                 Person.isBuiltWith("larry", "%moe", "curly");
-            }).toThrow(new Error("Model: isBuiltWith requires parameters preceded with a % to be the final parameters before the optional function"));
+            }).toThrow(new Error("Model: isBuiltWith requires parameters preceded with a % to be the final " + 
+                                 "parameters before the optional function"));
             expect(function () {
                 Person.isBuiltWith("larry", "moe", "curly", "%semmy");
-            }).not.toThrow(new Error("Model: isBuiltWith requires parameters preceded with a % to be the final parameters before the optional function"));
+            }).not.toThrow(new Error("Model: isBuiltWith requires parameters preceded with a % to be the final " +
+                                     "parameters before the optional function"));
             expect(function () {
                 Person.isBuiltWith("larry", "moe", "curly", "%semmy", "%john", function () { return false; });
-            }).not.toThrow(new Error("Model: isBuiltWith requires parameters preceded with a % to be the final parameters before the optional function"));
+            }).not.toThrow(new Error("Model: isBuiltWith requires parameters preceded with a % to be the final " + 
+                                     "parameters before the optional function"));
         });
 
 
@@ -1189,7 +1202,8 @@ describe("Model", function () {
             Person = new Model();
         });
 
-        it("should throw an error if the object is immutable and any of the attributes aren't required in isBuiltWith", function () {
+        it("should throw an error if the object is immutable and any of the attributes aren't required in isBuiltWith",
+           function () {
             var p;
             Person.hasA("firstName");
             Person.hasA("lastName");
@@ -1215,7 +1229,8 @@ describe("Model", function () {
             }).toThrow("cannot set the immutable property firstName after it has been set");
         });
 
-        it("should throw an error if any of the strings are not defined as attributes but are specified in isBuiltWith", function () {
+        it("should throw an error if any of the strings are not defined as attributes but are specified in " +
+           "isBuiltWith", function () {
             Person.hasA("firstName");
             Person.hasA("lastName");
             Person.hasAn("id");
@@ -1341,8 +1356,8 @@ describe("Model", function () {
             }).not.toThrow(new Error("Constructor requires firstName, lastName to be specified"));
         });
 
-        it("should throw an error if the constructor is called with more arguments than isBuiltWith specifies", function () {
-            
+        it("should throw an error if the constructor is called with more arguments than isBuiltWith specifies", 
+           function () {
             var Person,
                 p;
             Person = new Model(function () {
@@ -1466,7 +1481,8 @@ describe("Model", function () {
             expect(initializer).toHaveBeenCalled();
         });
 
-        it("should allow for AttrList attributes to be specified by isBuiltWith and initialized with a raw array", function () {
+        it("should allow for AttrList attributes to be specified by isBuiltWith and initialized with a raw array",
+           function () {
             var Devil,
                 satan,
                 p1, p2, p3;
