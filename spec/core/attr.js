@@ -27,17 +27,14 @@ describe("Attr", function () {
     ////////////////////////////////////////////////////////////////////////////
 
     describe("Constructor Tests", function () {
-        it("should throw an error on an empty or no string parameter",
-           function () {
+        it("should throw an error on an empty or no string parameter", function () {
                expect(function () {
                    suit = new Attr();
-               }).toThrow(new Error("Attr: constructor requires a name " +
-                                    "parameter which must be a string"));
+               }).toThrow(new Error("Attr: constructor requires a name parameter which must be a string"));
                
                expect(function () {
                    suit = new Attr(5);
-               }).toThrow(new Error("Attr: constructor requires a name " +
-                                    "parameter which must be a string"));
+               }).toThrow(new Error("Attr: constructor requires a name parameter which must be a string"));
            });
     });
 
@@ -67,8 +64,8 @@ describe("Attr", function () {
                 }).toThrow();
             });
             
-            it("should allow for a new error message to be set using " +
-               "this.message in the specified function", function () {
+            it("should allow for a new error message to be set using this.message in the specified function",
+               function () {
                 var v = function (num) {
                     this.message = "Expected " + num + " to be bigger than 5";
                     return num > 5;
@@ -104,8 +101,7 @@ describe("Attr", function () {
                 }).not.toThrow();
             });
             
-            it("should allow for multiple attrs to be created with different " + 
-               "validators", function () {
+            it("should allow for multiple attrs to be created with different validators", function () {
                 suit.validatesWith(function (suit) {
                     return suits.indexOf(suit) >= 0;
                 });
@@ -129,33 +125,31 @@ describe("Attr", function () {
         });
 
         describe("defaultsTo method", function () {
-            it("should validate the default value when it is added to an object",
-               function () {
-                   var spy = jasmine.createSpy(),
-                       v = function (age) {
-                           spy();
-                           return (typeof(age) === "number" && age >= 0);
-                       };
+            it("should validate the default value when it is added to an object", function () {
+                var spy = jasmine.createSpy(),
+                v = function (age) {
+                    spy();
+                    return (typeof(age) === "number" && age >= 0);
+                };
                    
-                   age.validatesWith(v).and.defaultsTo(0);
-                   age.addTo(obj);
-                   expect(spy).toHaveBeenCalled();
-                   
-                   age.defaultsTo(-5);
-                   expect(function () {
-                       age.addTo(obj);
-                   }).toThrow();
-               });
+                age.validatesWith(v).and.defaultsTo(0);
+                age.addTo(obj);
+                expect(spy).toHaveBeenCalled();
+                
+                age.defaultsTo(-5);
+                expect(function () {
+                    age.addTo(obj);
+                }).toThrow();
+            });
             
-            it("should set the attribute to the parameter for all new objects",
-               function () {
-                   age.defaultsTo(0);
-                   age.addTo(obj);
-                   expect(obj.age()).toBe(0);
-               });
+            it("should set the attribute to the parameter for all new objects", function () {
+                age.defaultsTo(0);
+                age.addTo(obj);
+                expect(obj.age()).toBe(0);
+            });
             
-            it("should call the function each time a default is assigned, " +
-               "when the validator is a function", function() {
+            it("should call the function each time a default is assigned, when the validator is a function",
+               function() {
                 var Dog = function (name) {
                     this.name = name;
                 };
@@ -216,27 +210,23 @@ describe("Attr", function () {
                 suit.addTo(Card);
             });
 
-            it("should allow for the setter to be called once after it is added " +
-               "to an object", function () {
-                   Card.suit("diamonds");
-                   expect(Card.suit()).toBe("diamonds");
-               });
+            it("should allow for the setter to be called once after it is added to an object", function () {
+                Card.suit("diamonds");
+                expect(Card.suit()).toBe("diamonds");
+            });
             
             it("should still validate it the first time it is set", function () {
                 expect(function () {
                     Card.suit("notARealRank");
-                }).toThrow(new Error("validator failed with parameter " + 
-                                     "notARealRank"));
+                }).toThrow(new Error("validator failed with parameter notARealRank"));
             });
             
-            it("should throw an error if the setter is called once the " +
-               "attribute is set", function () {
-                   Card.suit("diamonds");
-                   expect(function () {
-                       Card.suit("hearts");
-                   }).toThrow(new Error("cannot set the immutable property " + 
-                                        "suit after it has been set"));
-               });
+            it("should throw an error if the setter is called once the attribute is set", function () {
+                Card.suit("diamonds");
+                expect(function () {
+                    Card.suit("hearts");
+                }).toThrow(new Error("cannot set the immutable property suit after it has been set"));
+            });
             
             it("should return the Attr object for chaining", function () {
                 expect(suit.isReadOnly()).toBe(suit);
