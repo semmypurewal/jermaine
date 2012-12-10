@@ -111,8 +111,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     attr,
                     attrChangeListeners = {},
                     setHandler,
-                    lastListener,
-                    addProperties;
+                    addProperties,
+                    that = this;
 
                 if (!(this instanceof model)) {
                     throw new Error("Model: instances must be created using the new operator");
@@ -123,6 +123,13 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 ////////////// PUBLIC API FOR ALL INSTANCES ////////////////////
                 ////////////////////////////////////////////////////////////////
 
+                // this is a method associated with unit test
+                // it("should not increment the listeners associated with the last object created"
+                // it has been removed now that the bug has been fixed
+                /*this.attrChangeListeners = function () {
+                    return attrChangeListeners;
+                };*/
+
                 /**
                  * Returns the EventEmitter associated with this instance.
                  *
@@ -130,6 +137,53 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 this.emitter = function () {
                     return emitter;
                 };
+
+                /**
+                 * Wrapper methods added to the internal EventEmitter object
+                 * 
+                 */
+
+                this.emitter().removeJermaineChangeListener = function (attrName, obj) {
+                    if (typeof(attrName) !== "string") {
+                        throw new Error("attrName must be a string");
+                    } else if (typeof(obj) !== "object" || obj.toJSON === undefined ||
+                               obj.emitter === undefined) {
+                        throw new Error("obj must be a jermaine object");
+                    } else {
+                        obj.emitter().removeListener("change", attrChangeListeners[attrName]);
+                    }
+                };
+
+                this.emitter().addJermaineChangeListener = function (attrName, obj) {
+                    if (typeof(attrName) !== "string") {
+                        throw new Error("attrName must be a string");
+                    } else if (typeof(obj) !== "object" || obj.toJSON === undefined ||
+                               obj.emitter === undefined) {
+                        throw new Error("obj must be a jermaine object");
+                    } else {
+                        if (attrChangeListeners[attrName] === undefined) {
+                            attrChangeListeners[attrName] = function (data) {
+                                var newData = [],
+                                emit = true;
+                                
+                                for (i = 0; i < data.length && emit === true; ++i) {
+                                    newData.push(data[i]);
+                                    if (data[i].origin === that) {
+                                        emit = false;
+                                    }
+                                }
+                                
+                                if (emit) {
+                                    newData.push({key:attrName, origin:that});
+                                    that.emit("change", newData);
+                                }
+                            };
+                            
+                        }
+                        obj.emitter().on("change", attrChangeListeners[attrName]);
+                    }
+                };
+
 
                 /**
                  * Registers a listener for this instance's changes.
@@ -205,51 +259,43 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     return "Jermaine Model Instance";
                 };
 
+
                 ////////////////////////////////////////////////////////////////
                 ////////////// END PUBLIC API FOR ALL INSTANCES ////////////////
                 ////////////////////////////////////////////////////////////////
 
 
+                /**
+                 * This is a private method that sets up handling for the setter
+                 * It attaches a change listener on new objects
+                 * and it removes the change listener from old objects
+                 */
                 setHandler = function (attr) {
                     //when set handler is called, this should be the current object
                     attr.on("set", function (newValue, preValue) {
-                        var that = this;
+                        // if preValue is a model instance, we need to remove the listener from it
+                        if (preValue !== undefined && preValue !== null && preValue.on !== undefined &&
+                            preValue.toJSON !== undefined && preValue.emitter !== undefined) {
+                            // we now assume preValue is a model instance
 
-                        if (attrChangeListeners[attr.name()] === undefined) {
-                            attrChangeListeners[attr.name()] = function (data) {
-                                var newData = [],
-                                    emit = true;
-
-                                for (i = 0; i < data.length && emit === true; ++i) {
-                                    newData.push(data[i]);
-                                    if (data[i].origin === this) {
-                                        emit = false;
-                                    }
-                                }
-
-                                if (emit) {
-                                    newData.push({key:attr.name(), origin:this});
-                                    this.emit("change", newData);
-                                }
-                            };
-                        }
-                        
-                        if (lastListener !== undefined) {
-                            if (preValue !== undefined && preValue !== null && preValue.emitter !== undefined) {
-                                preValue.emitter().removeListener("change", lastListener);
-                                lastListener = undefined;
+                            // sanity check 1
+                            if (preValue.emitter().listeners("change").length < 1) {
+                                throw new Error("preValue should always have a listener defined if it is a model");
                             }
+                            
+                            this.emitter().removeJermaineChangeListener(attr.name(), preValue);
                         }
 
-                        if (newValue !== null && typeof(newValue) === "object" && newValue.on !== undefined && newValue.emitter !== undefined) {
-                            if (preValue !== undefined && preValue !== null && lastListener !== undefined) {
-                                preValue.emitter().removeListener("change", lastListener);
-                            }
-                            lastListener = function (data) {
-                                attrChangeListeners[attr.name()].call(that, data);
-                            };
-                            newValue.emitter().on("change", lastListener);
+                        // if newValue is a model instance, we need to attach a listener to it
+                        if (newValue !== undefined && newValue !== null && newValue.on !== undefined &&
+                            newValue.toJSON !== undefined && newValue.emitter !== undefined) {
+                            // we now assume newValue is a model instance
+
+                            // attach a listener
+                            this.emitter().addJermaineChangeListener(attr.name(), newValue);
                         }
+
+                        // finally emit that a change has happened
                         this.emit("change", [{key:attr.name(), value:newValue, origin:this}]);
                     });
                 };

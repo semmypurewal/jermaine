@@ -783,6 +783,32 @@ describe("Model", function () {
             expect(Person.attribute("things").on).not.toHaveBeenCalled();            
         });
 
+        // this was a bug, but I had to add to the public API
+        xit("should not increment the listeners associated with the last object created", function () {
+            var Dog = new Model(function () {
+                this.hasA("breed").which.isA("string");
+                this.isBuiltWith("breed");
+            });
+
+            var Person = new Model(function () {
+                this.hasA("name").which.isA("string");
+                this.hasA("dog").which.validatesWith(function (dog) {
+                    return dog instanceof Dog;
+                });
+                this.isBuiltWith("name");
+            });
+
+            var s = new Person("Semmy");
+            var m = new Person("Mark");
+            var d1 = new Dog("chow");
+            var d2 = new Dog("shepherd");
+
+            s.dog(d1);
+
+            expect(s.attrChangeListeners().dog).not.toBeUndefined();
+            expect(m.attrChangeListeners().dog).toBeUndefined();
+        });
+
         it("should create an object that has an 'on' method and an 'emitter' method", function () {
             p = new Person();
             expect(p.on).toBeDefined();
