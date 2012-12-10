@@ -258,7 +258,10 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 for (i = 0; i < attributeList.length;  ++i) {
                     attr = model.attribute(attributeList[i]);
 
-                    if (attr instanceof Attr) {
+                    // temporarily not adding handlers to attr lists
+                    // until we get the bugs sorted out
+                    // see model test "should not add change listeners to attr list"
+                    if (!(attr instanceof AttrList)) {
                         setHandler.call(this, attr);
                     }
                 }

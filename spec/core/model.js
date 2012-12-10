@@ -1,4 +1,4 @@
-/*global describe, it, beforeEach, expect, xit, jasmine */
+/*global describe, it, beforeEach, expect, xit, jasmine, spyOn */
 
 describe("Model", function () {
     "use strict";
@@ -769,6 +769,18 @@ describe("Model", function () {
             Person.hasA("friend");
             spy1 = jasmine.createSpy();
             spy2 = jasmine.createSpy();
+        });
+
+
+        // this is temporary until we get all the bugs
+        // worked out with attr change listeners
+        // right now, attr lists should not have change event listeners
+        it("should not add change listeners to attr list", function () {
+            Person.hasMany("things");
+            spyOn(Person.attribute("things"), "on");
+            expect(Person.attribute("things").on).not.toHaveBeenCalled();
+            var p = new Person();
+            expect(Person.attribute("things").on).not.toHaveBeenCalled();            
         });
 
         it("should create an object that has an 'on' method and an 'emitter' method", function () {
