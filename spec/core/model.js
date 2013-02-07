@@ -775,7 +775,7 @@ describe("Model", function () {
         // this is temporary until we get all the bugs
         // worked out with attr change listeners
         // right now, attr lists should not have change event listeners
-        it("should not add change listeners to attr list", function () {
+        xit("should not add change listeners to attr list", function () {
             Person.hasMany("things");
             spyOn(Person.attribute("things"), "on");
             expect(Person.attribute("things").on).not.toHaveBeenCalled();
@@ -1141,6 +1141,72 @@ describe("Model", function () {
             expect(p.dog().name()).toBe("Loki");
             expect(d1.emitter().listeners("change").length).toBe(0);
             expect(d2.emitter().listeners("change").length).toBe(1);
+        });
+
+
+        it("should emit a change event when adding an element to a list", function () {
+            var p,
+                addSpy = jasmine.createSpy();
+
+            Person = new Model(function () {
+                this.hasA("name").which.isA("string");
+                this.hasMany("aliases").eachOfWhich.isA("string");
+            });
+
+            p = new Person();
+
+            p.on("change", addSpy);
+            p.name("Semmy");
+
+            expect(addSpy).toHaveBeenCalled();
+            expect(addSpy.callCount).toBe(1);
+            p.aliases().add("name1");
+            expect(addSpy.callCount).toBe(2);
+            expect(addSpy).toHaveBeenCalledWith([{key:"name", value:"Semmy", origin:p}]);
+            expect(addSpy).toHaveBeenCalledWith([{action:"add", key:"aliases", value:"name1", origin:p}]);
+        });
+
+        it("should cascade change events when an object is added to a submodel's list", function () {
+            var p,
+                Dog,
+                d,
+                changeSpy = jasmine.createSpy();
+
+            Dog = new Model(function () {
+                this.hasA("name");
+                this.hasMany("aliases").eachOfWhich.isA("string");
+                this.isBuiltWith("name");
+            });
+
+            Person = new Model(function () {
+                this.hasA("name").which.isA("string");
+                this.hasA("dog").which.validatesWith(function (dog) {
+                    return (dog instanceof Dog || dog === null);
+                });
+                this.isBuiltWith("name");
+            });
+
+            p = new Person("Semmy");
+            p.on("change", changeSpy);
+            
+            d = new Dog("Loki");
+
+            p.dog(d);
+            expect(changeSpy).toHaveBeenCalled();
+            expect(changeSpy.callCount).toBe(1);
+            expect(changeSpy).toHaveBeenCalledWith([{key:"dog", value:d, origin:p}]);
+            
+            d.name("Gracie");
+            expect(changeSpy.callCount).toBe(2);
+            expect(changeSpy).toHaveBeenCalledWith([{key:"name", value:"Gracie", origin:d}, {key:"dog", origin:p}]);
+
+            p.dog().aliases().add("Sugar Pie");
+            expect(changeSpy.callCount).toBe(3);
+            expect(changeSpy).toHaveBeenCalledWith([{action:"add", key:"aliases", value:"Sugar Pie", origin:d}, {key:"dog", origin:p}]);
+
+            p.dog().aliases().add("Sweetie");
+            expect(changeSpy.callCount).toBe(4);
+            expect(changeSpy).toHaveBeenCalledWith([{action:"add", key:"aliases", value:"Sweetie", origin:d}, {key:"dog", origin:p}]);
         });
 
 

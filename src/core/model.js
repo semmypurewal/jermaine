@@ -110,7 +110,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     emitter = new EventEmitter(),
                     attr,
                     attrChangeListeners = {},
-                    setHandler,
+                    changeHandler,
                     addProperties,
                     that = this;
 
@@ -270,34 +270,40 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                  * It attaches a change listener on new objects
                  * and it removes the change listener from old objects
                  */
-                setHandler = function (attr) {
-                    //when set handler is called, this should be the current object
-                    attr.on("set", function (newValue, preValue) {
-                        // if preValue is a model instance, we need to remove the listener from it
-                        if (preValue !== undefined && preValue !== null && preValue.on !== undefined &&
-                            preValue.toJSON !== undefined && preValue.emitter !== undefined) {
-                            // we now assume preValue is a model instance
-
-                            // sanity check 1
-                            if (preValue.emitter().listeners("change").length < 1) {
-                                throw new Error("preValue should always have a listener defined if it is a model");
+                changeHandler = function (attr) {
+                    if (!(attr instanceof AttrList)) {
+                        //when set handler is called, this should be the current object
+                        attr.on("set", function (newValue, preValue) {
+                            // if preValue is a model instance, we need to remove the listener from it
+                            if (preValue !== undefined && preValue !== null && preValue.on !== undefined &&
+                                preValue.toJSON !== undefined && preValue.emitter !== undefined) {
+                                // we now assume preValue is a model instance
+                                
+                                // sanity check 1
+                                if (preValue.emitter().listeners("change").length < 1) {
+                                    throw new Error("preValue should always have a listener defined if it is a model");
+                                }
+                                
+                                this.emitter().removeJermaineChangeListener(attr.name(), preValue);
                             }
                             
-                            this.emitter().removeJermaineChangeListener(attr.name(), preValue);
-                        }
+                            // if newValue is a model instance, we need to attach a listener to it
+                            if (newValue !== undefined && newValue !== null && newValue.on !== undefined &&
+                                newValue.toJSON !== undefined && newValue.emitter !== undefined) {
+                                // we now assume newValue is a model instance
+                                
+                                // attach a listener
+                                this.emitter().addJermaineChangeListener(attr.name(), newValue);
+                            }
 
-                        // if newValue is a model instance, we need to attach a listener to it
-                        if (newValue !== undefined && newValue !== null && newValue.on !== undefined &&
-                            newValue.toJSON !== undefined && newValue.emitter !== undefined) {
-                            // we now assume newValue is a model instance
-
-                            // attach a listener
-                            this.emitter().addJermaineChangeListener(attr.name(), newValue);
-                        }
-
-                        // finally emit that a change has happened
-                        this.emit("change", [{key:attr.name(), value:newValue, origin:this}]);
-                    });
+                            // finally emit that a change has happened
+                            this.emit("change", [{key:attr.name(), value:newValue, origin:this}]);
+                        });
+                    } else {
+                        attr.on("add", function (newValue, newSize) {
+                            this.emit("change", [{action:"add", key:attr.name(), value:newValue, origin:this}]);
+                        });
+                    }
                 };
 
                 //set up event handling for sub objects
@@ -307,9 +313,9 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     // temporarily not adding handlers to attr lists
                     // until we get the bugs sorted out
                     // see model test "should not add change listeners to attr list"
-                    if (!(attr instanceof AttrList)) {
-                        setHandler.call(this, attr);
-                    }
+                    //if (!(attr instanceof AttrList)) {
+                    changeHandler.call(this, attr);
+                    //}
                 }
 
 
