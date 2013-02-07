@@ -114,6 +114,105 @@ describe("AttrList", function () {
         });
     });
 
+    describe("on method", function () {
+        var addSpy,
+            addSpy2,
+            al2,
+            obj2;
+
+        beforeEach(function () {
+            addSpy = jasmine.createSpy();
+            al = new AttrList("friends");
+        });
+
+        it("should throw an error if the event parameter is not 'add'", function () {
+            expect(function () {
+                al.on("set", function () {});
+            }).toThrow(new Error("AttrList: 'on' only responds to 'add' event"));
+
+            expect(function () {
+                al.on("add", function () {});
+            }).not.toThrow(new Error("AttrList: 'on' only responds to 'add' event"));
+        });
+
+        it("should throw an error if the listener parameter is not a function", function () {
+            expect(function () {
+                al.on("add", 5);
+            }).toThrow(new Error("AttrList: 'on' requires a listener function as the second parameter"));
+
+            expect(function () {
+                al.on("add", function () {});           
+            }).not.toThrow();
+        });
+
+        it("should call the add listener when an element is added to the list", function () {
+            al.on("add", addSpy);
+            al.addTo(obj);
+
+            obj.friends().add("john");
+
+            expect(addSpy).toHaveBeenCalled();
+            expect(addSpy.callCount).toBe(1);
+        });
+
+        it("should call the add listener with the new element that was added along with the new size", function () {
+            al.on("add", addSpy);
+            al.addTo(obj);
+
+            obj.friends().add("mark");
+            expect(addSpy.callCount).toBe(1);
+            expect(addSpy).toHaveBeenCalledWith("mark", 1);
+        });
+
+        it("should work for multiple attr_list objects", function () {
+            al2 = new AttrList("colleagues");
+            obj2 = {};
+            addSpy2 = jasmine.createSpy();
+            al.on("add", addSpy);
+            al2.on("add", addSpy2);
+
+            al.addTo(obj);
+            al2.addTo(obj2);
+
+            obj.friends().add("semmy");
+            obj2.colleagues().add("dean");
+
+            expect(addSpy).toHaveBeenCalled();
+            expect(addSpy2).toHaveBeenCalled();
+            expect(addSpy.callCount).toBe(1);
+            expect(addSpy2.callCount).toBe(1);
+            expect(addSpy).toHaveBeenCalledWith("semmy", 1);
+            expect(addSpy2).toHaveBeenCalledWith("dean", 1);
+
+            obj2.colleagues().add("rebecca");
+            expect(addSpy.callCount).toBe(1);
+            expect(addSpy2.callCount).toBe(2);
+            expect(addSpy2).toHaveBeenCalledWith("dean", 1);
+            expect(addSpy2).toHaveBeenCalledWith("rebecca", 2);
+        });
+
+        it("should work when the attr_list is added to multiple object", function () {
+            al.on("add", function (newValue, newSize) {
+                addSpy(newValue, newSize, this);
+            });
+
+            obj2 = {};
+
+            al.addTo(obj);
+            al.addTo(obj2);
+
+            obj.friends().add("mark");
+            obj2.friends().add("semmy");
+
+            expect(obj.friends().size()).toBe(1);
+            expect(obj2.friends().size()).toBe(1);
+            expect(addSpy.callCount).toBe(2);
+            expect(addSpy).toHaveBeenCalledWith("mark", 1, obj);
+            expect(addSpy).toHaveBeenCalledWith("semmy", 1, obj2);
+        });
+    });
+
+
     describe("addTo method", function () {
         var Person = {};
 

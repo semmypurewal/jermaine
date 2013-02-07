@@ -692,7 +692,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
     "use strict";
 
     function AttrList(name) {
-        var that = this;
+        var that = this,
+            listeners = {};
 
         //this is where the inheritance happens now
         ns.Attr.call(this, name);
@@ -719,6 +720,19 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
         this.eachOfWhich = this;
 
+        this.on = function (event, listener) {
+            if (event !== "add") {
+                throw new Error("AttrList: 'on' only responds to 'add' event");
+            }
+
+            if (typeof(listener) !== "function") {
+                throw new Error("AttrList: 'on' requires a listener function as the second parameter");
+            }
+
+            listeners[event] = listener;
+        };
+
+
         this.addTo = function (obj) {
             var prop,
             arr = [],
@@ -728,9 +742,13 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             } else {
                 actualList.pop = delegate(arr, "pop");
                 
-                actualList.add = function (obj) {
-                    if ((that.validator())(obj)) {
-                        arr.push(obj);
+                actualList.add = function (item) {
+                    if ((that.validator())(item)) {
+                        arr.push(item);
+                        if (listeners.add !== undefined) {
+                            //listeners.add.call();
+                            listeners.add.call(obj, item, actualList.size());
+                        }
                         return this;         
                     } else {
                         throw new Error(that.errorMessage());
