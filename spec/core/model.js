@@ -496,7 +496,9 @@ describe("Model", function () {
                 A,
                 a,
                 B,
+                B2,
                 b,
+                b2,
                 spy = jasmine.createSpy();
             
             initializer = function () {
@@ -527,9 +529,27 @@ describe("Model", function () {
             b = new B();
             expect(b.things()).toBeDefined();
 
+
+            //this is 3 because it creates a prototype object, too
             expect(spy.calls.length).toEqual(3);
             expect(b.things().at(0)).toBe(0);
             expect(b.things().size()).toBe(10);
+
+            B2 = new Model(function () {
+                var that = this;
+
+                this.isAn(A);
+                this.isBuiltWith(function () {
+                    that.parent.apply(this,arguments);
+                });
+            });
+
+            b2 = new B2();
+
+            //this is 5 because it creates a prototype object, too
+            expect(spy.calls.length).toEqual(5);
+            expect(b2.things().at(0)).toBe(0);
+            expect(b2.things().size()).toBe(10);
 
             var c = new B();
             expect(c.things).toBeDefined();
@@ -540,6 +560,40 @@ describe("Model", function () {
             expect(c.things().size()).toBe(11);
             expect(a.things().size()).toBe(10);
             expect(b.things().size()).toBe(10);
+
+            expect(c instanceof B).toBe(true);
+            expect(b instanceof A).toBe(true);
+            expect(b2 instanceof B2).toBe(true);
+            expect(b instanceof B2).toBe(false);
+            expect(b2 instanceof B).toBe(false);
+        });
+
+        ///hmmmmm
+        xit("should not clobber constructor variables when parent initializer is called", function () {
+            var Person, Employee, e;
+
+            Person = new Model(function () {
+                this.hasA("name");
+                this.hasAn("age");
+                this.isBuiltWith("name", function () {
+                    this.age(18);
+                });
+            });
+
+            Employee = new Model(function () {
+                var that = this;
+
+                this.isA(Person);
+
+                this.isBuiltWith("name", function () {
+                    that.parent.apply(this, [this.name()]);
+                });
+            });
+
+            e = new Employee("Mark");
+
+            expect(e.age()).toBe(18);
+            expect(e.name()).toBe("Mark");
         });
 
         it("should not throw an error if isBuiltWith is specified in the super-model", function () {
@@ -1665,13 +1719,21 @@ describe("Model", function () {
     });
 
 
-    it("should throw an error if the constructor is not called with the new operator", function () {
+    // change the API as per Effective JavaScript
+    xit("should throw an error if the constructor is not called with the new operator", function () {
         var p;
 
         expect(function () {
             /*jshint newcap:false */
             p = Person();
         }).toThrow("Model: instances must be created using the new operator");
+    });
+
+    it("should have a constructor that is new agnostic", function () {
+        var p;
+        /*jshint newcap:false */
+        p = Person();
+        expect(p instanceof Person).toBe(true);
     });
 
     it("should not throw an error when a model has a submodel defined in defaultsTo that changes", function () {

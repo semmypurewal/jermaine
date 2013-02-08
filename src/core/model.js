@@ -115,7 +115,16 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                     that = this;
 
                 if (!(this instanceof model)) {
-                    throw new Error("Model: instances must be created using the new operator");
+                    if (arguments.length > 0) {
+                        //bad form, but hopefully temporary
+                        /*jshint newcap:false */
+                        return new model(arguments);
+                    } else {
+                        //bad form, but hopefully temporary
+                        /*jshint newcap:false */
+                        return new model();
+                    }
+                    //throw new Error("Model: instances must be created using the new operator");
                 }
 
 
