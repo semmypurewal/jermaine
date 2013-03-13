@@ -2,6 +2,7 @@ module.exports = function (grunt) {
     var sources, libraries;
     
     sources = [
+        "util/index_of.js",
         "util/namespace.js",
         "util/event_emitter.js",
         "core/validator.js",
