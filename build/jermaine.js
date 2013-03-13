@@ -1,35 +1,3 @@
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
-        "use strict";
-        if (this == null) {
-            throw new TypeError();
-        }
-        var t = Object(this);
-        var len = t.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        var n = 0;
-        if (arguments.length > 0) {
-            n = Number(arguments[1]);
-            if (n != n) { // shortcut for verifying if it's NaN
-                n = 0;
-            } else if (n != 0 && n != Infinity && n != -Infinity) {
-                n = (n > 0 || -1) * Math.floor(Math.abs(n));
-            }
-        }
-        if (n >= len) {
-            return -1;
-        }
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) {
-                return k;
-            }
-        }
-        return -1;
-    }
-}
 /*global describe, it, beforeEach, expect, xit, jasmine */
 
 (function (ns) {
@@ -105,8 +73,7 @@ if (!Array.prototype.indexOf) {
     return namespace(ns, function (exports) {
         exports.namespace = namespace;
     });
-}("window.jermaine.util"));
-window.jermaine.util.namespace("window.jermaine.util", function (ns) {
+}("window.jermaine.util"));;window.jermaine.util.namespace("window.jermaine.util", function (ns) {
     "use strict";
     var EventEmitter = function () {
         var that = this,
@@ -215,7 +182,7 @@ window.jermaine.util.namespace("window.jermaine.util", function (ns) {
 
     ns.EventEmitter = EventEmitter;
 });
-window.jermaine.util.namespace("window.jermaine", function (ns) {
+;window.jermaine.util.namespace("window.jermaine", function (ns) {
     "use strict";
     var that = this,
         Validator,
@@ -330,7 +297,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
     ns.Validator = Validator;
 });
-/**
+;/**
  * Attr
  * 
  * Creates an encapsulated, chainable attribute that are validated by 
@@ -688,7 +655,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
     // export Attr to the specified namespace
     ns.Attr = Attr;
 });
-window.jermaine.util.namespace("window.jermaine", function (ns) {
+;window.jermaine.util.namespace("window.jermaine", function (ns) {
     "use strict";
 
     function AttrList(name) {
@@ -824,7 +791,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
     ns.AttrList = AttrList;
 });
-window.jermaine.util.namespace("window.jermaine", function (ns) {
+;window.jermaine.util.namespace("window.jermaine", function (ns) {
     "use strict";
 
     var Method = function (name, method) {
@@ -843,8 +810,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         };
     };
     ns.Method = Method;
-});
-window.jermaine.util.namespace("window.jermaine", function (ns) {
+});;window.jermaine.util.namespace("window.jermaine", function (ns) {
     "use strict";
 
     var Model = function (specification) {
