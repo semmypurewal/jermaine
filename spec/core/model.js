@@ -626,24 +626,19 @@ describe("Model", function () {
             Ferret = new Model();
 
             Human = new Model(function () {
-                //console.log("at 1");
                 this.hasA("ferret").which.isA(Ferret);
                 this.hasA("name").which.isA("string");
                 this.isBuiltWith("name");
             });
 
-            //console.log("at 2");
             var Person = new Model(function () {
-                console.log("at 3");
                 this.hasA("ferret").which.validatesWith(function (ferret) {
-                    console.log("at 4");
                     return ferret instanceof Ferret;
                 });
                 this.hasA("name").which.isA("string");
                 this.isBuiltWith("name");
             });
 
-            //console.log("at 5");
             Ferret = new Model(function () {
                 this.hasA("owner").which.isA(Human);
                 this.hasA("name").which.isA("string");
@@ -659,8 +654,6 @@ describe("Model", function () {
             }).not.toThrow();
             human.ferret(ferret);
             ferret.owner(human);
-            //console.log(human.ferret().name());
-            //console.log(ferret.owner().name());
         });
     });
         

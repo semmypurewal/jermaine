@@ -19,7 +19,7 @@ module.exports = function (grunt) {
             options: {
                 browser: true
             },
-            all: ["Gruntfile.js", "src/**/*.js"]
+            all: ["Gruntfile.js", "src/**/*.js", "spec/**/*.js"]
         },
         
         concat: {

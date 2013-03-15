@@ -10,17 +10,11 @@ describe("event emitter", function () {
     beforeEach(function () {
         e = new EventEmitter();
 
-        listener1 = function () {
-            console.log("hello from listener1!");
-        };
+        listener1 = function () { };
         
-        listener2 = function () {
-            console.log("hello from listener2!");
-        };
+        listener2 = function () { };
         
-        listener3 = function () {
-            console.log("hello from listener3!");
-        };
+        listener3 = function () { };
     });
 
     describe("constructor", function () {
@@ -34,12 +28,8 @@ describe("event emitter", function () {
         });
         
         it("should register multiple callbacks for a single event", function () {
-            e.on("event", function () {
-                console.log("function 1");
-            });
-            e.on("event", function () {
-                console.log("function 2");
-            });
+            e.on("event", function () { });
+            e.on("event", function () { });
             expect(e.listeners("event").length).toBe(2);
         });
         
@@ -62,7 +52,8 @@ describe("event emitter", function () {
         });
 
         it("should register multiple callbacks for a single event in a chain", function () {
-            e.on("event", function () { console.log("function 1");}).on("event", function () { console.log("function 2");});
+            e.on("event", function () { })
+                .on("event", function () { });
             expect(e.listeners("event").length).toBe(2);
         });
 
