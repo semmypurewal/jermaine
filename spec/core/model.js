@@ -52,7 +52,7 @@ describe("Model", function () {
                  }
             );
 
-            xit ("should overwrite the old model if the model constructor is " +
+            it ("should overwrite the old model if the model constructor is " +
                  " called again", function () {
                      var Person2 = new Model("Person");
                      Person = new Model("Person");
@@ -60,16 +60,20 @@ describe("Model", function () {
                  }
             );
 
-            xit ("should throw an error if the model name is not a string",
+            it ("should throw an error if the model name is not a string",
                  function () {
-                     
+                     expect(function () {
+                         Person = new Model(5);
+                     }).toThrow();
                  }
             );
 
 
-            xit ("should throw an error if the spec function is not a function",
+            it ("should throw an error if the spec function is not a function",
                  function () {
-
+                     expect(function () {
+                         Person = new Model("Person", 5);
+                     }).toThrow();
                  }
             );
         });

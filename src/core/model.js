@@ -4,8 +4,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
     var models = {},
         getModel,
         Model;
-    
 
+
+    /**
+     * this function return a model associated with a name
+     */
     getModel = function (name) {
         if (models[name] === undefined) {
             throw new Error("No model by the name of " + name + " found");
@@ -14,6 +17,9 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         }
     };
 
+    /**
+     * This is the model constructor
+     */
     Model = function (specification) {
         var methods = {},
             attributes = {},
@@ -64,8 +70,10 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         }
 
         //handle model name
-        if (modelName !== undefined) {
+        if (modelName !== undefined && typeof(modelName) === "string") {
             models[modelName] = model;
+        } else if (modelName !== undefined) {
+            throw new Error("Model: model name must be a string");
         }
 
         
