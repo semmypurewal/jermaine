@@ -844,8 +844,21 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
     ns.Method = Method;
 });;window.jermaine.util.namespace("window.jermaine", function (ns) {
     "use strict";
+    
+    var models = {},
+        getModel,
+        Model;
+    
 
-    var Model = function (specification) {
+    getModel = function (name) {
+        if (models[name] === undefined) {
+            throw new Error("No model by the name of " + name + " found");
+        } else {
+            return models[name];
+        }
+    };
+
+    Model = function (specification) {
         var methods = {},
             attributes = {},
             pattern,
@@ -880,8 +893,8 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             }
         }
 
-
         if (arguments.length > 1) {
+            modelName = specification;
             specification = arguments[arguments.length-1];
         }
 
@@ -894,6 +907,12 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             throw new Error("Model: specification parameter must be a function");
         }
 
+        //handle model name
+        if (modelName !== undefined) {
+            models[modelName] = model;
+        }
+
+        
         /********** BEGIN PRIVATE METHODS ****************/
         /* private method that abstracts hasA/hasMany */
         var hasAProperty = function (type, name) {
@@ -1422,5 +1441,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         return model;
     };
 
+
+    ns.getModel = getModel;
     ns.Model = Model;
 });

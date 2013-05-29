@@ -6,6 +6,7 @@ describe("Model", function () {
         Attr = window.jermaine.Attr,
         AttrList = window.jermaine.AttrList,
         Method = window.jermaine.Method,
+        getModel = window.jermaine.getModel,
         Person;
 
 
@@ -41,12 +42,12 @@ describe("Model", function () {
                  }
             );
 
-            xit ("should store the model by its name if the name is specified",
+            it ("should store the model by its name if the name is specified",
                  function () {
                      var PersonAlias;
 
                      Person = new Model("Person");
-                     PersonAlias = window.jermaine.getModel("Person");
+                     PersonAlias = getModel("Person");
                      expect(Person).toEqual(PersonAlias);
                  }
             );
@@ -55,7 +56,20 @@ describe("Model", function () {
                  " called again", function () {
                      var Person2 = new Model("Person");
                      Person = new Model("Person");
-                     expect(Person2).not.toEqual(window.jermaine.getModel("Person"));
+                     expect(Person2).not.toEqual(getModel("Person"));
+                 }
+            );
+
+            xit ("should throw an error if the model name is not a string",
+                 function () {
+                     
+                 }
+            );
+
+
+            xit ("should throw an error if the spec function is not a function",
+                 function () {
+
                  }
             );
         });
