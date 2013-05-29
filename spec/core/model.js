@@ -24,14 +24,20 @@ describe("Model", function () {
                  }
             );
 
-            xit ("should allow a spec function to be sent in as a second arg",
+            it ("should allow a spec function to be sent in as a second arg",
                  function () {
+                     var p;
+
                      expect(function () {
                          Person = new Model("Person", function () {
                              this.hasA("name").which.isA("string");
                              this.hasAn("age").which.isAn("integer");
                          });
                      }).not.toThrow();
+
+                     p = new Person();
+                     expect(p.age).not.toBeUndefined();
+                     expect(p.name).not.toBeUndefined();
                  }
             );
 
