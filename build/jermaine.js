@@ -849,6 +849,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         var methods = {},
             attributes = {},
             pattern,
+            modelName,
             modified = true,
             requiredConstructorArgs = [],
             optionalConstructorArgs = [],
@@ -872,8 +873,14 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 return constructor.apply(this, arguments);
             };
 
+        if (arguments.length === 1) {
+            if (typeof(specification) === "string") {
+                modelName = specification;
+                specification = undefined;
+            }
+        }
 
-        //temporary fix so API stays the same
+
         if (arguments.length > 1) {
             specification = arguments[arguments.length-1];
         }

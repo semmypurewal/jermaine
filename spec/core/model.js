@@ -10,7 +10,49 @@ describe("Model", function () {
 
 
     beforeEach(function () {
+        // this creates an anonymous model
         Person = new Model();
+    });
+
+    describe("#constructor", function () {
+        describe("model name features", function () {
+            it ("should allow for a string to be sent as a first arg",
+                 function () {
+                     expect(function () {
+                         Person = new Model("Person");
+                     }).not.toThrow();
+                 }
+            );
+
+            xit ("should allow a spec function to be sent in as a second arg",
+                 function () {
+                     expect(function () {
+                         Person = new Model("Person", function () {
+                             this.hasA("name").which.isA("string");
+                             this.hasAn("age").which.isAn("integer");
+                         });
+                     }).not.toThrow();
+                 }
+            );
+
+            xit ("should store the model by its name if the name is specified",
+                 function () {
+                     var PersonAlias;
+
+                     Person = new Model("Person");
+                     PersonAlias = window.jermaine.getModel("Person");
+                     expect(Person).toEqual(PersonAlias);
+                 }
+            );
+
+            xit ("should overwrite the old model if the model constructor is " +
+                 " called again", function () {
+                     var Person2 = new Model("Person");
+                     Person = new Model("Person");
+                     expect(Person2).not.toEqual(window.jermaine.getModel("Person"));
+                 }
+            );
+        });
     });
 
     describe("hasA method", function () {
