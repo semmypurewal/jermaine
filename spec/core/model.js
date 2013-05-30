@@ -42,6 +42,24 @@ describe("Model", function () {
                  }
             );
 
+            it ("should allow for multiple models to be created and stored",
+                // this is for a bugfix
+                function () {
+                    var Dog;
+
+                    Dog = new Model("Dog", function () {
+                        this.hasA("name");
+                    });
+
+                    Person = new Model("Person", function () {
+                        this.hasA("name");
+                    });
+
+                    expect(getModel("Person")).not.toBeUndefined();
+                    expect(getModel("Dog")).not.toBeUndefined();
+                }
+            );
+
             it ("should store the model by its name if the name is specified",
                  function () {
                      var PersonAlias;

@@ -62,7 +62,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
 
         //handle specification function
         if (specification && typeof(specification) === "function") {
-            model = new Model();
+            model = new Model(modelName);
             specification.call(model);
             return model;
         } else if (specification) {
