@@ -19,6 +19,13 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         return validatorFunction;
     };
 
+    /**
+     * @name The name of the validator for the attribute
+     * @v The validator specification (returns a boolean)
+     * @argumentPredicate the boolean that checks the types of args sent
+     *           to the validator
+     */
+
     Validator.addValidator = function (name, v) {
         if (name === undefined || typeof(name) !== "string") {
             throw new Error("addValidator requires a name to be specified as the first parameter");

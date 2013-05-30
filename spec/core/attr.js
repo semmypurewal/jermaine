@@ -548,6 +548,14 @@ describe("Attr", function () {
         });
         
         describe("isA validator", function () {
+            xit("should throw an error if the paramter is not a primitive type",
+               function () {
+                   expect(function () {
+                       num.isA("thing");
+                   }).toThrow();
+               }
+            );
+
             it("once added to the object, it should throw an error if the argument is " + 
                "not the correct type", function () {
                    num.isA("number").and.isGreaterThan(5).and.isLessThan(10);
@@ -567,6 +575,9 @@ describe("Attr", function () {
                    }).toThrow("hello should be a number");
                });
             
+
+
+
             //deprecated until we find a good way to handle circular references
             xit("should allow for constructor types to be sent in", function () {
                 var a,

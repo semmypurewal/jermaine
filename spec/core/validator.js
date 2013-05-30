@@ -16,6 +16,10 @@ describe("Validator", function () {
 
     });
 
+    describe("behavior once added to an attribute", function () {
+        
+    });
+
     describe("static addValidator method", function () {
         it("should throw an error if the first parameter is absent or not a string", function () {
             expect(function () {
