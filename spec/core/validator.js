@@ -16,11 +16,12 @@ describe("Validator", function () {
 
     });
 
-    describe("behavior once added to an attribute", function () {
-        
-    });
 
     describe("static addValidator method", function () {
+        var trivialValidator = function () {
+            return true;
+        };
+
         it("should throw an error if the first parameter is absent or not a string", function () {
             expect(function () {
                 Validator.addValidator();
@@ -57,6 +58,52 @@ describe("Validator", function () {
                 });
             }).toThrow("Validator 'isGreaterThan5' already defined");
         });
+
+        it("should accept a third arg that must be a function" , function () {
+            expect(function () {
+                Validator.addValidator("isLessThan5", function () {}, 5);
+            }).toThrow();
+
+            expect(function () {
+                Validator.addValidator("isLessThan10", function () {}, function () {});
+            }).not.toThrow();
+        });
+
+        it("should call the argValidator on the expected val once added",
+           function () {
+               var argValidatorSpy = jasmine.createSpy(),
+                   argValidator = function () {
+                       argValidatorSpy.apply(argValidatorSpy,arguments);
+                       return true;
+                   };
+               
+
+               Validator.addValidator("exampleValidator", trivialValidator,
+                                      argValidator);
+               Validator.getValidator("exampleValidator")("example");
+               expect(argValidatorSpy).toHaveBeenCalledWith("example");
+           }
+        );
+
+        it("should throw an error if the argValidator fails",
+           function () {
+               var argValidator= function (arg) {
+                   //only valid input to this validator
+                   return arg === "test";
+               };
+           
+               Validator.addValidator("exampleValidator2", trivialValidator,
+                                      argValidator);
+               
+               expect(function () {
+                   Validator.getValidator("exampleValidator2")("example");
+               }).toThrow();
+
+               expect(function () {
+                   Validator.getValidator("exampleValidator2")("example");
+               }).toThrow();
+           }
+        );
     });
 
     describe("static getValidator method", function () {

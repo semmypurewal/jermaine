@@ -22,11 +22,11 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
     /**
      * @name The name of the validator for the attribute
      * @v The validator specification (returns a boolean)
-     * @argumentPredicate the boolean that checks the types of args sent
+     * @argValidator the boolean that checks the types of args sent
      *           to the validator
      */
 
-    Validator.addValidator = function (name, v) {
+    Validator.addValidator = function (name, v, argValidator) {
         if (name === undefined || typeof(name) !== "string") {
             throw new Error("addValidator requires a name to be specified as the first parameter");
         }
@@ -35,8 +35,22 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
             throw new Error("addValidator requires a function as the second parameter");
         }
 
+        // optional third argument to validate the 
+        // expected value that gets sent to the validator
+        // for example, isA("number") works but isA("nmber")
+        // doesn't work
+        if (argValidator !== undefined && typeof(argValidator) !== "function") {
+            throw new Error("addValidator third optional argument must be a "+
+                            "function");
+        }
+
         if (validators[name] === undefined) {
             validators[name] = function (expected) {
+                if (argValidator !== undefined) {
+                    if (!argValidator(expected)) {
+                        throw new Error ("Validator: Invalid argument for " + name + " validator");
+                    };
+                }
                 return new Validator(function (val) {
                     var resultObject = {"actual":val, "param":val},
                         result = v.call(resultObject, expected);

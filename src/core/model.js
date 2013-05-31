@@ -3,12 +3,21 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
     
     var models = {},
         getModel,
+        getModels,
         Model;
 
 
     /**
      * this function return a model associated with a name
      */
+    getModel = function (name) {
+        if (models[name] === undefined) {
+            throw new Error("No model by the name of " + name + " found");
+        } else {
+            return models[name];
+        }
+    };
+
     getModel = function (name) {
         if (models[name] === undefined) {
             throw new Error("No model by the name of " + name + " found");

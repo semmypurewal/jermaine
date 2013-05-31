@@ -15,6 +15,22 @@ describe("Model", function () {
         Person = new Model();
     });
 
+    describe("#getModel", function () {
+        xit ("should return the specified model", function () {
+            
+        });
+
+        xit ("should throw an error if the arg is not a string", function () {
+            
+        });
+    });
+
+    describe("#getModels", function () {
+        xit ("should return an array of the model names", function () {
+
+        });
+    });
+
     describe("#constructor", function () {
         describe("model name features", function () {
             it ("should allow for a string to be sent as a first arg",
