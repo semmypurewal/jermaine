@@ -321,10 +321,14 @@ if (!Array.prototype.indexOf) {
     });
 
     Validator.addValidator("isA", function (val) {
-        var types = ["string", "number", "boolean", "function", "object"];
+        var types = ["string", "number", "boolean", "function", "object"],
+            models = window.jermaine.getModels();
         if (typeof(val) === "string" && types.indexOf(val) > -1) {
             this.message = this.param + " should be a " + val;
             return typeof(this.param) === val;
+        } else if (typeof(val) === "string" && models.indexOf(val) > -1) {
+            this.message = "parameter should be an instance of " + val;
+            return this.param instanceof window.jermaine.getModel(val);
         } else if (val === 'integer') {
             // special case for 'integer'; since javascript has no integer type,
             // just check for number type and check that it's numerically an int
@@ -339,6 +343,12 @@ if (!Array.prototype.indexOf) {
         } else {
             throw new Error("Validator: isA only accepts a string for a primitive types for the time being");
         }
+    },
+    //argument validator
+    function (val) {
+        var typesAndModels = ["string", "number", "boolean", "function",
+                              "object", "integer"].concat(window.jermaine.getModels());
+        return typesAndModels.indexOf(val) >= 0;
     });
 
     validators.isAn = validators.isA;

@@ -44,12 +44,11 @@ describe("Model", function () {
                 Test2 = new window.jermaine.Model("Test2"),
                 Test3;
 
-            expect(window.jermaine.getModels().length).toBe(2);
-
+            expect(window.jermaine.getModels().indexOf("Test1")).toBeGreaterThan(-1);
+            expect(window.jermaine.getModels().indexOf("Test2")).toBeGreaterThan(-1);
+            expect(window.jermaine.getModels().indexOf("Test3")).toBe(-1);
             Test3 = new window.jermaine.Model("Test3");
-
-            expect(window.jermaine.getModels().length).toBe(3);
-
+            expect(window.jermaine.getModels().indexOf("Test3")).toBeGreaterThan(-1);
         });
     });
 

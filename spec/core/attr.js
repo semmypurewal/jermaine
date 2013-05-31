@@ -575,25 +575,23 @@ describe("Attr", function () {
                    }).toThrow("hello should be a number");
                });
             
-
-
-
-            //deprecated until we find a good way to handle circular references
-            xit("should allow for constructor types to be sent in", function () {
+            it ("should allow for model types to be sent in", function () {
                 var a,
                     t,
-                    Thing = function () {
+                    Thing;
 
-                    };
+                Thing = window.jermaine.Model("Thing", function () {
+                    
+                });
 
                 a = new Attr("thing");
-                a.isA(Thing);
+                a.isA("Thing");
                 t = new Thing();
                 a.addTo(obj);
                 
                 expect(function () {
                     obj.thing(5);
-                }).toThrow("5 should be an Object");
+                }).toThrow();
                 
                 expect(function () {
                     obj.thing(t);
