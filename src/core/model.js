@@ -6,11 +6,14 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         getModels,
         Model;
 
-
     /**
      * this function return a model associated with a name
      */
     getModel = function (name) {
+        if (typeof(name) !== "string") {
+            throw new Error("Jermaine: argument to getModel must be a string");
+        }
+
         if (models[name] === undefined) {
             throw new Error("No model by the name of " + name + " found");
         } else {
@@ -18,12 +21,18 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         }
     };
 
-    getModel = function (name) {
-        if (models[name] === undefined) {
-            throw new Error("No model by the name of " + name + " found");
-        } else {
-            return models[name];
+    /**
+     * this function returns an array of all model names stored by
+     * jermaine
+     */
+    getModels = function (name) {
+        var model,
+            result = [];
+        
+        for (model in models) {
+            result.push(model);
         }
+        return result;
     };
 
     /**
@@ -614,7 +623,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
         return model;
     };
 
-
     ns.getModel = getModel;
+    ns.getModels = getModels;
     ns.Model = Model;
 });

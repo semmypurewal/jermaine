@@ -49,7 +49,7 @@ window.jermaine.util.namespace("window.jermaine", function (ns) {
                 if (argValidator !== undefined) {
                     if (!argValidator(expected)) {
                         throw new Error ("Validator: Invalid argument for " + name + " validator");
-                    };
+                    }
                 }
                 return new Validator(function (val) {
                     var resultObject = {"actual":val, "param":val},

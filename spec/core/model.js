@@ -16,17 +16,39 @@ describe("Model", function () {
     });
 
     describe("#getModel", function () {
-        xit ("should return the specified model", function () {
-            
+        it ("should return the specified model", function () {
+            var Test = new window.jermaine.Model("Test1"),
+                Test2 = new window.jermaine.Model("Test2");
+
+            expect(window.jermaine.getModel("Test1")).toEqual(Test);
+            expect(window.jermaine.getModel("Test2")).not.toEqual(Test);
+            expect(window.jermaine.getModel("Test2")).toEqual(Test2);
         });
 
-        xit ("should throw an error if the arg is not a string", function () {
-            
+        it ("should throw an error if the arg is not a string", function () {
+            expect(function () {
+                window.jermaine.getModel(5);
+            }).toThrow();
+        });
+
+        it ("should throw an error if the model is not found", function () {
+            expect(function () {
+                window.jermaine.getModel("notAModel");
+            }).toThrow(); 
         });
     });
 
     describe("#getModels", function () {
-        xit ("should return an array of the model names", function () {
+        it ("should return an array of the model names", function () {
+            var Test = new window.jermaine.Model("Test1"),
+                Test2 = new window.jermaine.Model("Test2"),
+                Test3;
+
+            expect(window.jermaine.getModels().length).toBe(2);
+
+            Test3 = new window.jermaine.Model("Test3");
+
+            expect(window.jermaine.getModels().length).toBe(3);
 
         });
     });
