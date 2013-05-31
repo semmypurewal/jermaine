@@ -518,35 +518,6 @@ describe("Attr", function () {
     ///////////////////////////////////////////////////////////////////////////
 
     describe("Validator-related Tests", function () {
-        describe("isGreaterThan validator", function () {
-            it("once added to the object, it should throw an error if the argument " + 
-               " is not greater than the parameter", function () {
-                   num.isGreaterThan(5);
-                   num.addTo(obj);
-                   
-                   expect(function () {
-                       obj.num(4);
-                   }).toThrow("4 should be greater than 5");
-               });
-        });
-        
-        describe("isLessThan validator", function () {
-            it("once added to the object, it should throw an error if the argument is " + 
-               "not less than the parameter", function () {
-                   num.isGreaterThan(5);
-                   num.isLessThan(10);
-                   num.addTo(obj);
-                   
-                   expect(function () {
-                       obj.num(4);
-                   }).toThrow("4 should be greater than 5");
-                   
-                   expect(function () {
-                       obj.num(12);
-                   }).toThrow("12 should be less than 10");
-               });
-        });
-        
         describe("isA validator", function () {
             xit("should throw an error if the paramter is not a primitive type",
                function () {
@@ -614,16 +585,6 @@ describe("Attr", function () {
             });
         });
         
-        describe("isOneOf validator", function () {
-            it("should throw an error if the parameter does not come from the specified set", function () {
-                suit.isOneOf(suits);
-                suit.addTo(Card);
-                expect(function () {
-                    Card.suit("cubs");
-                }).toThrow("cubs should be one of the set: clubs,diamonds,hearts,spades");
-            });
-        });
-
         describe("integer validation", function() {
             it("should not throw an error when an integer is assigned", function() {
                 var index = new Attr("index").which.isA('integer');

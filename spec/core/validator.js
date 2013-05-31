@@ -140,4 +140,62 @@ describe("Validator", function () {
 
         });
     });
+
+
+    describe("built-in validators", function () {
+        describe("#isGreaterThan", function () {
+            it("it should throw if the arg is not greater than the parameter",
+               function () {
+                   var isGreaterThan5 = Validator.getValidator("isGreaterThan")(5);
+                   expect(function () {
+                       isGreaterThan5(4);
+                   }).toThrow("4 should be greater than 5");
+                   
+                   expect(function () {
+                       isGreaterThan5(6);
+                   }).not.toThrow();
+               }
+            );
+        });
+
+        describe("#isLessThan", function () {
+            it("it should throw if the arg is not less than the parameter",
+               function () {
+                   var isLessThan5 = Validator.getValidator("isLessThan")(5),
+                       isLessThan10 = Validator.getValidator("isLessThan")(10);
+                   
+                   expect(function () {
+                       isLessThan5(6);
+                   }).toThrow("6 should be less than 5");
+                   
+                   expect(function () {
+                       isLessThan10(12);
+                   }).toThrow("12 should be less than 10");
+                   
+                   expect(function () {
+                       isLessThan10(8);
+                   }).not.toThrow();
+                   
+                   expect(function () {
+                       isLessThan5(4);
+                   }).not.toThrow();
+                   
+               }
+            );
+        });
+
+        describe("#isOneOf", function () {
+            it("should throw if param does not come from the set", function () {
+                var isOneOfTester = Validator.getValidator("isOneOf")(["A","B","C"]);
+
+                expect(function () {
+                    isOneOfTester("D");
+                }).toThrow("D should be one of the set: A,B,C");
+
+                expect(function () {
+                    isOneOfTester("A");
+                }).not.toThrow();
+            });
+        });        
+    });
 });
