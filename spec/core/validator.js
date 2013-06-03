@@ -125,8 +125,8 @@ describe("Validator", function () {
            function () {
                expect(function () {
                    Validator.getValidator();
-               }).toThrow("Validator: getValidator method requires a string "
-                          + "parameter");
+               }).toThrow("Validator: getValidator method requires a string " +
+                          "parameter");
            }
         );
 
