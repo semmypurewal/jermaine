@@ -12,7 +12,8 @@ describe("Validator", function () {
 
     });
 
-    xit("should return a function object that has the specified message as an attributes", function () {
+    xit("should return a function object that has the specified message as" +
+        " an attributes", function () {
 
     });
 
@@ -22,42 +23,54 @@ describe("Validator", function () {
             return true;
         };
 
-        it("should throw an error if the first parameter is absent or not a string", function () {
+        it("should throw an error if the first parameter is absent or not a " +
+           "string", function () {
             expect(function () {
                 Validator.addValidator();
-            }).toThrow(new Error("addValidator requires a name to be specified as the first parameter"));
+            }).toThrow(new Error("addValidator requires a name to be " + 
+                                 "specified as the first parameter"));
 
             expect(function () {
                 Validator.addValidator(5);
-            }).toThrow(new Error("addValidator requires a name to be specified as the first parameter"));
+            }).toThrow(new Error("addValidator requires a name to be " + 
+                                 "specified as the first parameter"));
         });
 
-        it("should throw an error if the second parameter is absent or not a function", function () {
+        it("should throw an error if the second parameter is absent or not a " +
+           "function", function () {
             expect(function () {
                 Validator.addValidator("isGreaterThan");
-            }).toThrow("addValidator requires a function as the second parameter");
+            }).toThrow("addValidator requires a function as the second " +
+                       "parameter");
 
             expect(function () {
                 Validator.addValidator("isGreaterThan", 5);
-            }).toThrow("addValidator requires a function as the second parameter");
+            }).toThrow("addValidator requires a function as the second " + 
+                       "parameter");
         });
 
-        it("should add the validator object to the static validators list", function () {
-            expect(function () {
-                Validator.addValidator("isGreaterThan5", function (expected) {
-                    this.message = "Expected " + this.actual + " to be greater than 5";
-                    return this.actual > 5;
-                });
-            }).not.toThrow();
-        });
+        it("should add the validator object to the static validators list", 
+           function () {
+               expect(function () {
+                   Validator.addValidator("isGreaterThan5", function (expected){
+                       this.message = "Expected " + this.actual + " to be " +
+                                      "greater than 5";
+                       return this.actual > 5;
+                   });
+               }).not.toThrow();
+           }
+        );
 
-        it("should throw an error if a validator is added that already exists", function () {
-            expect(function () {
-                Validator.addValidator("isGreaterThan5", function (thing) {
-                    return false;
-                });
-            }).toThrow("Validator 'isGreaterThan5' already defined");
-        });
+        it("should throw an error if a validator is added that already exists", 
+           function () {
+               expect(function () {
+                   Validator.addValidator("isGreaterThan5", function (thing) {
+                       return false;
+                   });
+               }).toThrow("Validator 'isGreaterThan5' already defined");
+           }
+        );
+
 
         it("should accept a third arg that must be a function" , function () {
             expect(function () {
@@ -65,7 +78,8 @@ describe("Validator", function () {
             }).toThrow();
 
             expect(function () {
-                Validator.addValidator("isLessThan10", function () {}, function () {});
+                Validator.addValidator("isLessThan10", function () {}, 
+                                       function () {});
             }).not.toThrow();
         });
 
@@ -107,19 +121,25 @@ describe("Validator", function () {
     });
 
     describe("static getValidator method", function () {
-        it("should throw an error if there is no parameter specified", function () {
-            expect(function () {
-                Validator.getValidator();
-            }).toThrow("Validator: getValidator method requires a string parameter");
-        });
+        it("should throw an error if there is no parameter specified",
+           function () {
+               expect(function () {
+                   Validator.getValidator();
+               }).toThrow("Validator: getValidator method requires a string "
+                          + "parameter");
+           }
+        );
 
-        it("should throw an error if the parameter is not a string", function () {
-            expect(function () {
-                Validator.getValidator(5);
-            }).toThrow("Validator: parameter to getValidator method must be a string");
-        });
+        it("should throw an error if the parameter is not a string",
+           function () {
+               expect(function () {
+                   Validator.getValidator(5);
+               }).toThrow("Validator: parameter to getValidator method must be" +
+                          " a string");
+           }
+        );
 
-        it("should throw an error if the validator does not exist", function () {
+        it("should throw an error if validator does not exist", function () {
             expect(function () {
                 Validator.getValidator("nonExistentValidator");
             }).toThrow("Validator: 'nonExistentValidator' does not exist");
@@ -141,12 +161,16 @@ describe("Validator", function () {
         });
     });
 
+    ///////////////////////////////////////////////////////////////////////////
+    /////////////////////// BUILT-IN VALIDATOR TESTS //////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
     describe("built-in validators", function () {
         describe("#isGreaterThan", function () {
             it("it should throw if the arg is not greater than the parameter",
                function () {
-                   var isGreaterThan5 = Validator.getValidator("isGreaterThan")(5);
+                   var isGreaterThan = Validator.getValidator("isGreaterThan"),
+                       isGreaterThan5 = isGreaterThan(5);
                    expect(function () {
                        isGreaterThan5(4);
                    }).toThrow("4 should be greater than 5");
@@ -186,7 +210,8 @@ describe("Validator", function () {
 
         describe("#isOneOf", function () {
             it("should throw if param does not come from the set", function () {
-                var isOneOfTester = Validator.getValidator("isOneOf")(["A","B","C"]);
+                var isOneOf = Validator.getValidator("isOneOf"),
+                    isOneOfTester = isOneOf(["A","B","C"]);
 
                 expect(function () {
                     isOneOfTester("D");
@@ -240,21 +265,24 @@ describe("Validator", function () {
             });
 
 
-            it("should throw an error if the parameter is a string and not one of " + 
-               "the JS predefined types", function () {
-                expect(function () {
-                    isA("nmbr");
-                }).toThrow();
-            });
+            it("should throw an error if the parameter is a string and not" + 
+               "one of the JS predefined types", function () {
+                   expect(function () {
+                       isA("nmbr");
+                   }).toThrow();
+               }
+            );
 
             describe("integer validation", function() {
-                it("should not throw an error when an integer is assigned", function() {
-                    expect(function () {
-                        isA("integer")(-1);
-                    }).not.toThrow();
-                });
+                it("should not throw an error when an integer is assigned",
+                   function() {
+                       expect(function () {
+                           isA("integer")(-1);
+                       }).not.toThrow();
+                   }
+                );
 
-                it("should throw an error when a non-integer number is assigned", function() {
+                it("should throw an error on a non-integer", function() {
                     expect(function () {
                         isA("integer")(-1.2);
                     }).toThrow(new Error("-1.2 should be an integer"));
@@ -274,4 +302,8 @@ describe("Validator", function () {
             });
         });
     });
+
+    ///////////////////////////////////////////////////////////////////////////
+    /////////////////////// END BUILT-IN VALIDATOR TESTS //////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 });
