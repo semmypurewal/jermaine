@@ -196,6 +196,82 @@ describe("Validator", function () {
                     isOneOfTester("A");
                 }).not.toThrow();
             });
-        });        
+        });
+
+        describe("#isA", function () {
+            var isA;
+
+            beforeEach(function () {
+                isA = Validator.getValidator("isA");
+            });
+
+            it("it should throw an error if the param is not the correct type",
+               function () {
+                   expect(function () {
+                       isA("number")(4);
+                   }).not.toThrow();
+                   
+                   expect(function () {
+                       isA("string")("hello");
+                   }).not.toThrow("");
+                   
+                   expect(function () {
+                       isA("number")("hello");
+                   }).toThrow("hello should be a number");
+               }
+            );
+
+            it ("should allow for model types to be sent in", function () {
+                var a,
+                    t,
+                    Thing;
+
+                Thing = window.jermaine.Model("Thing", function () { });
+
+                t = new Thing();
+
+                expect(function () {
+                    isA("Thing")(5);
+                }).toThrow();
+                
+                expect(function () {
+                    isA("Thing")(t);
+                }).not.toThrow();
+            });
+
+
+            it("should throw an error if the parameter is a string and not one of " + 
+               "the JS predefined types", function () {
+                expect(function () {
+                    isA("nmbr");
+                }).toThrow();
+            });
+
+            describe("integer validation", function() {
+                it("should not throw an error when an integer is assigned", function() {
+                    expect(function () {
+                        isA("integer")(-1);
+                    }).not.toThrow();
+                });
+
+                it("should throw an error when a non-integer number is assigned", function() {
+                    expect(function () {
+                        isA("integer")(-1.2);
+                    }).toThrow(new Error("-1.2 should be an integer"));
+                    expect(function () {
+                        isA("integer")("fred");
+                    }).toThrow(new Error("fred should be an integer"));
+                });
+            });
+        });
+
+        describe("#isAn", function () {
+            it ("should be an alias for isA", function () {
+                var isA = Validator.getValidator("isA"),
+                    isAn = Validator.getValidator("isAn");
+
+                expect(isA).toEqual(isAn);
+            });
+        });
     });
 });
